@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { EditorViewModel } from '../../../../../../src/app/features/example-documents/components/editor/editor.view-model';
 import { exampleDocument } from '../../../../../fixtures/example-document';
 
@@ -8,7 +11,13 @@ describe('Scoped editor view model', () => {
   let vm: EditorViewModel;
   let http: HttpTestingController;
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [EditorViewModel, provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [
+        EditorViewModel,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
     vm = TestBed.inject(EditorViewModel);
     http = TestBed.inject(HttpTestingController);
   });
@@ -25,7 +34,10 @@ describe('Scoped editor view model', () => {
     expect(first.request.body.archived).toBeFalse();
     expect(vm.submitting()).toBeTrue();
     expect(vm.form.disabled).toBeTrue();
-    first.flush({ message: 'Save interrupted' }, { status: 503, statusText: 'Unavailable' });
+    first.flush(
+      { message: 'Save interrupted' },
+      { status: 503, statusText: 'Unavailable' }
+    );
     expect(saved).not.toHaveBeenCalled();
     expect(vm.error()).toBe('Save interrupted');
     expect(vm.form.getRawValue().archived).toBeFalse();

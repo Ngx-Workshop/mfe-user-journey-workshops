@@ -12,6 +12,8 @@ below with relative links. A feature folder contains `spec.md`, `plan.md`,
 | --- | --- | --- | --- | --- | --- |
 | 001 MVVM starter | Complete | [Spec](001-mvvm-starter/spec.md) | [Plan](001-mvvm-starter/plan.md) | [Tasks](001-mvvm-starter/tasks.md) | [Handoff](001-mvvm-starter/handoff.md) |
 
+| 002 Workshop progression | Implemented; live integration pending | [Spec](002-workshop-progression/spec.md) | [Plan](002-workshop-progression/plan.md) | [Tasks](002-workshop-progression/tasks.md) | [Handoff](002-workshop-progression/handoff.md) |
+
 Keep one row per feature, retain completed records for rationale, and update
 status when work changes. Select work from the user's request and this index;
 the largest folder number is not automatically the active feature.

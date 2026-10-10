@@ -1,89 +1,39 @@
 # Architecture and external context
+Updated 2026-10-10 for [002 workshop progression](../specs/002-workshop-progression/spec.md).
 
-Updated 2026-10-09 for [001 MVVM starter](../specs/001-mvvm-starter/spec.md).
-The executable seed demonstrates example-document list/search/create/edit/delete.
-It owns this journey; shell, gateway, auth and backend data are external owners.
+## Responsibilities and source map
+The remote owns the learner workshop catalog and basic reader. The former example-document starter remains in the checkout as reference code/tests but is no longer rendered by App.
 
-## Source map
+- `src/app/app.ts`, `app.routes.ts`: public composition and route exports.
+- `features/workshop-journey/api`: stateless HTTP client.
+- `features/workshop-journey/state`: root store, server snapshot, loading/error/write state.
+- `features/workshop-journey/pages/journey`: scoped VM, typed assessment control, current workshop/page, command streams and composition.
+- `features/workshop-journey/components`: typed reader inputs and user intent outputs.
+- `features/workshop-journey/utils`: error/block mapping. Workshop pages render with `@tmdjr/ngx-editor-js2` 21.0.9, matching the document editor. Serialized blocks retain their identities, types, content and saved actions; legacy HTML is adapted to a paragraph block. No trusted-HTML bypass or document-save handler.
+- `testing/app` mirrors runtime; synthetic fixtures live in `testing/fixtures`.
 
-```text
-src/app/
-  app.ts / app.config.ts / app.routes.ts
-  features/example-documents/
-    api/                  # stateless ExampleCrudApiService
-    models/               # generated DTO exports, dialog/form types
-    state/                # singleton ExampleDocumentsStore
-    forms/                # stateless typed ExampleFormService
-    utils/                # user-facing API error mapping
-    pages/catalog/        # catalog orchestration + scoped CatalogViewModel
-    components/
-      document-card/      # typed card presentation
-      document-form/      # document/address form presentations
-      editor/             # dialog orchestration + scoped EditorViewModel
-testing/
-  app/                    # mirrors source app/features folders
-  fixtures/               # synthetic test-only DTOs
-scripts/check-architecture.mjs
-```
-
-The data flow is API → singleton store → scoped VM → component template.
-User intents flow from presentation outputs → orchestration/VM → store → API.
-App is a thin public composition entry point. Catalog/dialog components inject
-scoped VMs and UI integration such as MatDialog. Cards/forms inject no server state.
-Forms accept a typed FormGroup from the owning scoped VM; this demonstrates nested
-presentation without putting forms in singleton state.
-
-The store exposes readonly shared signals and owns loading/error/mutation state.
-Its root refresh stream uses switchMap to cancel stale reads and retains successful
-records on read failure. Mutation observables trigger refresh on success; finalize
-releases pending state on completion/error/cancellation. A refresh error after a
-successful write stays a read error, not a failed write that encourages duplicates.
-Scoped command streams use exhaustMap; takeUntilDestroyed ends their requests.
-Editor errors keep the form open and preserve input for retry. Form mapping sends
-false archived and blank description explicitly and validates optional addresses.
+Reads use switchMap; revision checks prevent an older catalog response from overwriting a successful mutation. Commands use exhaustMap and lifetime-bound subscriptions. Failed completion preserves the selected workshop and confirmation; failed assessment preserves its answer. The singleton store depends on HTTP, not Router/forms/Material. The scoped VM owns navigation/form state.
 
 ## Federation and providers
+Preserve named/default App, named Routes, `./Component`, `./Routes`, `remoteEntry.js`, and the empty-path redirect to `hello-world`. Angular/Material/CDK 21.1.0 and existing shared versions remain. Host supplies HTTP/session interceptors and Router. Standalone bootstrap renders App directly; optional Router is used only to retain example mode in the hosted URL. Production webpack retains the starter's module-concatenation repair.
 
-Keep named/default App, named Routes, mfe-user-journey-workshops, ./Component, ./Routes and
-remoteEntry.js. The route export retains empty-path redirect to hello-world.
-The host supplies HttpClient/session interceptors and Router when it consumes
-Routes. Remote loading does not install standalone appConfig. Standalone bootstrap
-uses App directly and needs no Router because the example has no route navigation.
-It provides zoneless change detection, HTTP and animations. src/styles.scss supplies
-the standalone Material theme; federation does not install this theme in the host.
+## Data ownership and policy
+Document service owns section IDs, workshop levels and journey entries. Assessment service owns live initial results. User metadata service owns a separate `workshop_progress` collection keyed by authenticated UUID; the profile schema is unchanged and profile PATCH cannot update progress.
 
-Angular/Material/CDK 21.1.0, RxJS 7.8.2 and strict shared versions remain unchanged.
-Production webpack disables module concatenation to preserve Angular identities
-across federation boundaries; the inherited optimized configuration failed at
-runtime with a missing defineInjectable export before this repair.
-Module Federation and ngx-build-plus retain inherited 20-series versions; builds
-and standalone verification do not prove every host combination compatible.
+Initial assessment completion unlocks max(1, highestPassedLevel), capped at level 20. Every workshop at the current configured level is required before advancing to the next configured level. Missing level defaults to 1; existing level gaps advance to the next actual level. Sections match by ID, never title. Completed workshop IDs are sets; duplicate completion is idempotent. Completion is explicit learner self-attestation in this iteration, including referenced exercises. It is not automatic lab/assessment mastery verification.
 
-## External contracts
+Only eligible incomplete workshops have start/resume cards. Completed names are shown in a separate expandable list. The server rechecks eligibility for start, completion and its reader endpoint. Existing public document-service endpoints retain their own access policy; this feature does not turn public documents into private resources.
 
-The installed @tmdjr/seed-service-nestjs-contracts 0.0.7 types define the consumer
-DTOs; backend validation defines accepted requests. The stateless API normalizes
-its base URL to /api/example-crud and encodes IDs once for detail paths.
+## HTTP contracts
+The generated `@tmdjr/user-metadata-contracts` 0.0.2 types are installed from the checked-in local tarball in vendor. They are generated from service-user-metadata OpenAPI; publication is pending. No backend DTO is recreated in this remote.
 
-| Method | Browser path | Contract |
+| Method | Browser path | Response |
 | --- | --- | --- |
-| GET | /api/example-crud | ExampleMongodbDocDto[] |
-| GET | /api/example-crud/:id | ExampleMongodbDocDto |
-| POST | /api/example-crud | CreateExampleMongodbDocDto → document |
-| PATCH | /api/example-crud/:id | UpdateExampleMongodbDocDto → document |
-| DELETE | /api/example-crud/:id | void |
+| GET | /api/user-metadata/workshop-progress | WorkshopProgressDto |
+| POST | …/workshops/:id/start | WorkshopProgressDto |
+| POST | …/workshops/:id/complete | WorkshopProgressDto |
+| GET | …/workshops/:id/pages/:pageId | WorkshopReadingDto |
 
-The backend owns persistence/authorization. The seed contains no auth guard and
-does not fabricate credentials or backend behavior. Blank address fields omit
-the address property; PATCH then preserves an existing address. The published
-update DTO provides no null/removal field, so removing an address requires a
-producer contract change. Partial nonblank addresses are invalid locally.
+The explicit local example substitutes `http://localhost:3004/user-metadata/workshop-progress` and adds POST `example-assessments/:sectionId` and POST `example-reset`. These sample commands return 404 outside explicit isolated example mode. The backend guards loopback/origin/database and uses the existing synthetic local identity. No live initial test is faked: live test links use `/take-assessment-test/overview?view=subject&subject=<section ID>`. Coding-lab references are displayed; a learner lab remote is not available in this workspace, and automatic exercise grading is outside this iteration.
 
-Host/registry owners are mfe-shell-workshop, mfe-shell-admin and
-service-mfe-orchestrator. Gateway owners map the browser API prefix to
-seed-service-nestjs. Package/shared metadata owners are independent repositories.
-No sibling checkout is needed; use local HTTP doubles when services are unavailable.
-
-Build output remains dist/mfe-user-journey-workshops. The existing deploy workflow targets
-/opt/mfe-remotes/mfe-user-journey-workshops on main. Registration/gateway configuration and
-actual deployment are separate integration work; this change does not execute them.
+Backend upstreams `DOCKER_NET_NAME_DOCUMENT` and `DOCKER_NET_NAME_ASSESSMENT` must be configured with trusted API prefixes. Server forwards only session Cookie and Authorization, and never a client-selected upstream. See the service guide for rollout. Existing service/gateway deployment is external integration work.

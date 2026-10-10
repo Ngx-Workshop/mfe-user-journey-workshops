@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ExampleMongodbDocListComponent } from './features/example-documents/pages/catalog/example-mongodb-doc-list.component';
+import { WorkshopJourneyComponent } from './features/workshop-journey/pages/journey/workshop-journey.component';
 
 @Component({
   selector: 'mfe-user-journey-workshops',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ExampleMongodbDocListComponent],
-  template: `<ngx-example-mongodb-doc-list />`,
+  imports: [WorkshopJourneyComponent],
+  template: `<ngx-workshop-journey />`,
   styles: [':host { display: block; }'],
 })
 export class App {}

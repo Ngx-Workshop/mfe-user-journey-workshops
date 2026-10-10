@@ -32,7 +32,7 @@ validation, dialog retry and narrow layouts. Static bundle serving does not prox
 uses the platform's session-local remote override for localhost:4201/remoteEntry.js.
 Standalone appConfig is not installed by host remote loading.
 
-## Current limits and repaired starter defects
+## Historical starter limits and repairs
 
 The obsolete title test, component API coupling, missing subscription teardown,
 optimized Angular federation initialization, missing standalone Material theme,
@@ -43,3 +43,22 @@ preserve it and the UI explains this. No auth policy, producer change, deploymen
 or live-data test is part of this starter upgrade.
 
 See [001 handoff](../specs/001-mvvm-starter/handoff.md) for actual results and limits.
+
+
+## Workshop progression example (2026-10-10)
+
+The App entry now renders workshop progression. From `service-user-metadata`, run
+`npm run start:workshop-example` with local Mongo running. This watches the service on port 3004, binds loopback and uses the isolated `user_metadata_local` database. The current local remote static server on port 4201 serves the rebuilt bundle. With the existing workshop remote override, open:
+
+https://beta.ngx-workshop.io/workshops/hello-world?workshopExample=local
+
+Take the sample initial assessment; finish both Angular level 1 workshops with the explicit completion checkbox to reveal level 2. RxJS remains gated independently. Refresh/reload resumes persisted state. Reset local example replays only this synthetic learning progress. The local service is left running after implementation. Restart it with the command above if needed.
+
+`npm run test:workshop-example:http` in service-user-metadata exercises real HTTP and local Mongo; it resets only sample progress and leaves level 2 unlocked. Remote ChromeHeadless tests use HTTP doubles. Backend live catalog needs the new service version and configured upstream APIs. A live 404 currently shows an integration message and offers the explicit local example.
+
+Builds can warn that the retained starter feature files are unused; they are no longer rendered. See [002 handoff](../specs/002-workshop-progression/handoff.md) for final evidence and live rollout limits.
+
+Standalone example (no hosted sign-in needed): http://localhost:4201/?workshopExample=local
+
+## Workshop page editor
+Lesson pages use `@tmdjr/ngx-editor-js2` 21.0.9, the same version as the document editor. The editor currently permits temporary changes; no formChanged or blocksRequested handler persists them. Reopening a lesson fetches its original content. Empty pages show an explicit placeholder instead of the library default heading. Malformed serialized blocks show the existing lesson error/retry state. Readonly support is deferred to the library.

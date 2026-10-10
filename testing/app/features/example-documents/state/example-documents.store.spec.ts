@@ -1,6 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ExampleDocumentsStore } from '../../../../../src/app/features/example-documents/state/example-documents.store';
 import { exampleDocument } from '../../../../fixtures/example-document';
 
@@ -8,7 +11,9 @@ describe('Shared example documents store', () => {
   let store: ExampleDocumentsStore;
   let http: HttpTestingController;
   beforeEach(() => {
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     store = TestBed.inject(ExampleDocumentsStore);
     http = TestBed.inject(HttpTestingController);
   });
@@ -21,7 +26,12 @@ describe('Shared example documents store', () => {
     expect(store.loading()).toBeTrue();
     http.expectOne('/api/example-crud').flush([exampleDocument]);
     store.reload();
-    http.expectOne('/api/example-crud').flush({ message: 'Unavailable' }, { status: 503, statusText: 'Unavailable' });
+    http
+      .expectOne('/api/example-crud')
+      .flush(
+        { message: 'Unavailable' },
+        { status: 503, statusText: 'Unavailable' }
+      );
     expect(store.documents()).toEqual([exampleDocument]);
     expect(store.error()).toBe('Unavailable');
     expect(store.loading()).toBeFalse();
@@ -33,10 +43,17 @@ describe('Shared example documents store', () => {
     const saved = jasmine.createSpy('saved');
     store.update('doc-1', { archived: false }).subscribe(saved);
     expect(store.mutating()).toBeTrue();
-    http.expectOne('/api/example-crud/doc-1').flush({ ...exampleDocument, archived: false });
-    expect(saved).toHaveBeenCalledOnceWith({ ...exampleDocument, archived: false });
+    http
+      .expectOne('/api/example-crud/doc-1')
+      .flush({ ...exampleDocument, archived: false });
+    expect(saved).toHaveBeenCalledOnceWith({
+      ...exampleDocument,
+      archived: false,
+    });
     expect(store.mutating()).toBeFalse();
-    http.expectOne('/api/example-crud').flush({}, { status: 503, statusText: 'Unavailable' });
+    http
+      .expectOne('/api/example-crud')
+      .flush({}, { status: 503, statusText: 'Unavailable' });
     expect(store.error()).toContain('try again');
   });
   it('retains records after failed deletion and resets pending state on cancellation', () => {
@@ -44,7 +61,9 @@ describe('Shared example documents store', () => {
     http.expectOne('/api/example-crud').flush([exampleDocument]);
     const failed = jasmine.createSpy('failed');
     store.remove('doc-1').subscribe({ error: failed });
-    http.expectOne('/api/example-crud/doc-1').flush({}, { status: 403, statusText: 'Forbidden' });
+    http
+      .expectOne('/api/example-crud/doc-1')
+      .flush({}, { status: 403, statusText: 'Forbidden' });
     expect(failed).toHaveBeenCalled();
     expect(store.documents()).toEqual([exampleDocument]);
     expect(store.mutating()).toBeFalse();

@@ -12,8 +12,8 @@ npm test -- --watch=false --browsers=ChromeHeadless \
   --include='../testing/app/features/example-documents/forms/example-form.service.spec.ts'
 ```
 
-Karma discovery is relative to src: angular.json includes ../testing/**/*.spec.ts.
-The test compiler includes testing/**/*.ts plus src/**/*.d.ts and compiles app
+Karma discovery is relative to src: angular.json includes ../testing/**/\*.spec.ts.
+The test compiler includes testing/**/_.ts plus src/\**/_.d.ts and compiles app
 modules through imports. The production compiler excludes specs/testing.
 HTTP doubles verify client mappings, shared state cancellation/retry, form
 validation/update semantics, scoped editor commands and actual app rendering.
