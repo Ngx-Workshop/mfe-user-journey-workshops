@@ -15,7 +15,7 @@ The remote owns the learner workshop catalog and basic reader. The former exampl
 Reads use switchMap; revision checks prevent an older catalog response from overwriting a successful mutation. Commands use exhaustMap and lifetime-bound subscriptions. Failed page-progress saves retain the lesson and offer retry; failed assessment preserves its answer. The singleton store depends on HTTP, not Router/forms/Material. The scoped VM owns navigation/form state.
 
 ## Federation and providers
-Preserve named/default App, named Routes, `./Component`, `./Routes`, `remoteEntry.js`, and the empty-path redirect to `hello-world`. Angular/Material/CDK 21.1.0 and existing shared versions remain. Host supplies HTTP/session interceptors and Router. Standalone bootstrap renders App directly; optional Router is used only to retain example mode in the hosted URL. Production webpack retains the starter's module-concatenation repair.
+Preserve named/default App, named Routes, `./Component`, `./Routes`, `remoteEntry.js`, and the empty-path redirect to `overview`. Angular/Material/CDK 21.1.0 and existing shared versions remain. Host supplies HTTP/session interceptors and Router. Standalone bootstrap renders App directly; optional Router is used only to retain example mode in the hosted URL. Production webpack retains the starter's module-concatenation repair.
 
 ## Data ownership and policy
 Document service owns section IDs, workshop levels and journey entries. Assessment service owns live initial results. User metadata service owns a separate `workshop_progress` collection keyed by authenticated UUID; the profile schema is unchanged and profile PATCH cannot update progress.
@@ -35,8 +35,12 @@ The generated `@tmdjr/user-metadata-contracts` 0.0.53 types are installed from t
 | POST | …/workshops/:id/complete | Validating compatibility endpoint; no completion override |
 | GET | …/workshops/:id/pages/:pageId | WorkshopReadingDto |
 
-The explicit local example substitutes `http://localhost:3004/user-metadata/workshop-progress` and adds POST `example-assessments/:sectionId` and POST `example-reset`. These sample commands return 404 outside explicit isolated example mode. The backend guards loopback/origin/database and uses the existing synthetic local identity. No live initial test is faked: live test links use `/take-assessment-test/overview?view=subject&subject=<section ID>`. Coding-lab references are displayed; a learner lab remote is not available in this workspace, and automatic exercise grading is outside this iteration.
+The explicit local example substitutes `http://localhost:3004/user-metadata/workshop-progress` and adds POST `example-assessments/:sectionId` and POST `example-reset`. These sample commands return 404 outside explicit isolated example mode. The backend guards loopback/origin/database and uses the existing synthetic local identity. No live initial test is faked: live test links use `/take-assessment-test/overview?view=subject&subject=<section ID>`. Coding-lab references now link to the learner lab remote at `/coding-labs/hello-world` with exact resource and return context. Coding lab grading remains owned by its services.
 
 Backend upstreams `DOCKER_NET_NAME_DOCUMENT` and `DOCKER_NET_NAME_ASSESSMENT` must be configured with trusted API prefixes. Server forwards only session Cookie and Authorization, and never a client-selected upstream. See the service guide for rollout. Existing service/gateway deployment is external integration work.
 
 The remote sends POST workshops/:id/pages/:pageId/seen to record rendered pages and consumes the resulting catalog. The old complete route remains a validating compatibility endpoint and cannot override prerequisites. Completion statuses are derived; persisted page visit pairs provide the evidence. Deploy the new service before using this remote version.
+
+## Workshop continuity — 2026-10-11
+
+See [003 continuity](../specs/003-workshop-continuity/handoff.md). Workshop reader route is `/workshops/overview`, matching its executable Routes. Activities accept `returnTo` (validated to that reader route and workshop/page query keys) and `workshopName`. Assessments accept an exact `test` definition ID; labs accept an exact published `lab` ID. Activity navigation merges query context; return reloads the server catalog and restores the lesson. No automatic starts or altered completion policy. Host Router owns cross-remote navigation; no nested remotes.

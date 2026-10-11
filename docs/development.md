@@ -72,3 +72,7 @@ Lesson pages use `@tmdjr/ngx-editor-js2` 21.0.9, the same version as the documen
 
 ## Automatic workshop completion
 The checkbox and complete command were removed. Seen pages are saved after successful decoding/rendering; failures do not count and progress writes offer retry. The local Components workshop now has two pages and a separate assessment. Reset the isolated example, take the initial assessment, visit both pages, then take Component assessment: completion updates automatically. Live users return from the assessment journey and refresh progress. Old self-attested completions may require revisiting pages. Active tests exclude obsolete example-document specs and their fixture because those runtime source files were removed; default npm test now runs the workshop journey tests. Generated contract 0.0.53 is installed from vendor and has not been published.
+
+## Continuity verification — 2026-10-11
+
+12 ChromeHeadless tests and an isolated optimized build passed for this checkout. Synthetic desktop (1366px) and phone (390px) browser previews had no page errors or horizontal overflow. See [handoff](../specs/003-workshop-continuity/handoff.md) for evidence and the pending signed-in shell walkthrough. Use `/workshops/overview` for workshop returns; earlier `hello-world` workshop examples are outdated. Standalone lab providers now register exported Routes; cross-remote return paths still require host routing.

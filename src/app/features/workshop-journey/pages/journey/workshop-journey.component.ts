@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
+  ElementRef, Injector, afterNextRender, effect, viewChild,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { WorkshopHeroComponent } from '../../components/workshop-hero.component';
 import { JourneyViewModel } from './journey.view-model';
 import { WorkshopReaderComponent } from '../../components/workshop-reader.component';
 
@@ -17,27 +19,14 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
     MatButtonModule,
     MatProgressBarModule,
     WorkshopReaderComponent,
+    WorkshopHeroComponent,
   ],
   providers: [JourneyViewModel],
   template: `
-    <main class="journey">
-      <header class="journey__header">
-        <div>
-          <h1>Your workshops</h1>
-          <p>
-            Assess your starting point, complete workshops, and unlock
-            the next level.
-          </p>
-        </div>
-        <button
-          mat-button
-          (click)="vm.refresh()"
-          [disabled]="vm.busy() || vm.loading()"
-        >
-          Refresh progress
-        </button>
-      </header>
-      <div class="journey__mode">
+    @if (!vm.selected()) { <ngx-workshop-hero /> }
+    <nav class="journey__nav" aria-label="Workshop views"><span>Workshops</span><button mat-button (click)="vm.refresh()" [disabled]="vm.busy() || vm.loading()">Refresh progress</button></nav>
+    <main #content tabindex="-1" class="journey" [attr.aria-busy]="vm.loading() || vm.busy()">
+      <details class="journey__example"><summary>{{ vm.example() ? 'Local example active · Preview options' : 'Local preview options' }}</summary><div class="journey__mode">
         <button
           mat-button
           (click)="vm.changeMode(!vm.example())"
@@ -63,6 +52,7 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
           </button>
         }
       </div>
+      </details>
       @if (vm.loading()) {
         <mat-progress-bar
           mode="indeterminate"
@@ -133,12 +123,14 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
           [error]="vm.pageError()"
           [busy]="vm.busy()"
           [assessmentUrl]="vm.assessmentUrl(workshop.sectionId)"
+          [labUrl]="vm.labUrl('')"
           (read)="vm.read($event)"
           [example]="vm.example()"
           [visitError]="vm.visitError()"
           [visitPending]="vm.visitPending()"
           (seen)="vm.seen($event)"
           (assess)="vm.beginWorkshopAssessment($event)"
+          (activity)="vm.activity($event)"
           (exit)="vm.close()"
         />
       } @else {
@@ -166,11 +158,12 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
                 <a
                   mat-flat-button
                   [href]="vm.assessmentUrl(section.sectionId)"
+                  (click)="vm.activity({ url: vm.assessmentUrl(section.sectionId), event: $event })"
                   >Take initial assessment</a
                 >
                 <p>
-                  After submitting your assessment, return here and
-                  refresh progress.
+                  Use Return to workshop after your assessment to
+                  see your updated progress.
                 </p>
               } @else {
                 <p>
@@ -269,19 +262,28 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
           }
         }
       }
-    </main>
+    </main><footer class="journey__footer"><span>Small steps. Lasting understanding.</span><span>NGX WORKSHOP ✦</span></footer>
   `,
   styles: [
     `
       :host {
-        display: block;
-        color: var(--mat-sys-on-surface);
+        display: block; min-width: 0; width: 100%; font-family: 'Roboto', sans-serif;
+        color: var(--ink); --ink: var(--mat-sys-on-surface); --muted: var(--mat-sys-on-surface-variant);
+        --panel: var(--mat-sys-surface-container-lowest); --soft: var(--mat-sys-surface-container);
+        --line: var(--mat-sys-outline-variant); --accent: var(--mat-sys-primary);
+        --primary-soft: var(--mat-sys-primary-container); --on-primary-soft: var(--mat-sys-on-primary-container);
       }
-      .journey {
-        max-width: 72rem;
-        margin: auto;
-        padding: clamp(1rem, 3vw, 2.5rem);
-      }
+      * { box-sizing: border-box; }
+      .journey { max-width: 1340px; margin: auto; padding: 38px clamp(22px, 5vw, 65px) 50px; }
+      .journey:focus { outline: none; }
+      .journey__nav { display: flex; justify-content: space-between; align-items: center; padding: 12px clamp(22px, 5vw, 65px); border-bottom: 1px solid var(--line); background: var(--panel); color: var(--accent); font-size: 13px; }
+      .journey__example { margin-bottom: 24px; color: var(--muted); font-size: 12px; }
+      summary { cursor: pointer; }
+      .journey__footer { border-top: 1px solid var(--line); margin: 0 clamp(22px, 5vw, 65px); padding: 22px 0; display: flex; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 10px; }
+      h2 { font-size: 25px; margin: 0 0 12px; }
+      h3 { font-size: 22px; }
+      p { line-height: 1.7; }
+      button:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
       .journey__header,
       .journey__mode {
         display: flex;
@@ -291,8 +293,9 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
         gap: 1rem;
       }
       .journey__section {
-        padding: 1.5rem;
-        margin-block: 1.5rem;
+        padding: clamp(20px, 3vw, 28px);
+        margin-block: 24px;
+        background: var(--panel);
         border: 1px solid var(--mat-sys-outline-variant);
         border-radius: 1rem;
       }
@@ -305,8 +308,9 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
         gap: 1rem;
       }
       .journey__workshop {
-        padding: 1rem;
-        border-radius: 0.75rem;
+        padding: 24px;
+        border: 1px solid var(--line);
+        border-radius: 16px;
         background: var(--mat-sys-surface-container);
       }
       .journey__level,
@@ -340,4 +344,18 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
 })
 export class WorkshopJourneyComponent {
   readonly vm = inject(JourneyViewModel);
+  private readonly content = viewChild<ElementRef<HTMLElement>>('content');
+  constructor() {
+    const injector = inject(Injector);
+    const host = inject<ElementRef<HTMLElement>>(ElementRef);
+    effect(() => {
+      const id = this.vm.selectedId();
+      const page = this.vm.pageId();
+      afterNextRender(() => {
+        if (id !== this.vm.selectedId() || page !== this.vm.pageId()) return;
+        this.content()?.nativeElement.focus({ preventScroll: true });
+        (id ? this.content()?.nativeElement : host.nativeElement)?.scrollIntoView({ block: 'start' });
+      }, { injector });
+    });
+  }
 }

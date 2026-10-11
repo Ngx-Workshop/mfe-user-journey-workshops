@@ -12,12 +12,14 @@ import {
   NgxEditorJs2Component,
   NgxEditorJsBlock,
 } from '@tmdjr/ngx-editor-js2';
+import { WorkshopOutlineComponent } from './workshop-outline.component';
+import { activityUrl } from '../utils/activity-url';
 import { Workshop } from '../models/workshop.models';
 
 @Component({
   selector: 'ngx-workshop-reader',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatButtonModule, NgxEditorJs2Component],
+  imports: [MatButtonModule, NgxEditorJs2Component, WorkshopOutlineComponent],
   template: `
     <section class="reader" aria-label="Active workshop">
       <button mat-button (click)="exit.emit()" [disabled]="busy()">
@@ -26,66 +28,10 @@ import { Workshop } from '../models/workshop.models';
       <p class="reader__level">Level {{ workshop().level }}</p>
       <h2>{{ workshop().name }}</h2>
       <p>{{ workshop().summary }}</p>
-      <nav class="reader__outline" aria-label="Workshop contents">
-        @for (entry of entries(); track entry._id) {
-          @if (entry.kind === 'PAGE') {
-            <button
-              mat-button
-              [attr.aria-current]="
-                pageId() === entry._id ? 'step' : null
-              "
-              (click)="read.emit(entry._id)"
-              [disabled]="busy()"
-            >
-              {{ entry.name }}
-              {{
-                workshop().viewedPageIds.includes(entry._id)
-                  ? '(seen)'
-                  : ''
-              }}
-            </button>
-          } @else if (entry.kind === 'ASSESSMENT_TEST') {
-            @if (example()) {
-              <button
-                mat-button
-                (click)="assess.emit(entry.resourceId!)"
-                [disabled]="
-                  busy() ||
-                  workshop().completedAssessmentIds.includes(
-                    entry.resourceId!
-                  )
-                "
-              >
-                {{ entry.name }}
-                {{
-                  workshop().completedAssessmentIds.includes(
-                    entry.resourceId!
-                  )
-                    ? '(completed)'
-                    : '(assessment)'
-                }}
-              </button>
-            } @else {
-              <a mat-button [href]="assessmentUrl()"
-                >{{ entry.name }}
-                {{
-                  workshop().completedAssessmentIds.includes(
-                    entry.resourceId!
-                  )
-                    ? '(completed)'
-                    : '(assessment)'
-                }}</a
-              >
-            }
-          } @else {
-            <p class="reader__reference">
-              {{ entry.name }} — coding lab: {{ entry.resourceId }}
-            </p>
-          }
-        } @empty {
-          <p>No lesson pages have been added to this workshop.</p>
-        }
-      </nav>
+      <div class="reader__workspace">
+      <ngx-workshop-outline [workshop]="workshop()" [pageId]="pageId()" [busy]="busy() || !!visitError()" [example]="example()" [assessmentUrl]="assessmentUrl()" [labUrl]="labUrl()" (read)="read.emit($event)" (assess)="assess.emit($event)" (activity)="activity.emit($event)" />
+      <div class="reader__lesson">
+      @if (current(); as lesson) { <p class="reader__level">LESSON {{ pageIndex() + 1 }} OF {{ pages().length }}</p><h3>{{ lesson.name }}</h3> }
       @if (loading()) {
         <p role="status">Loading lesson…</p>
       }
@@ -106,31 +52,22 @@ import { Workshop } from '../models/workshop.models';
           />
         </article>
       }
-      @if (pages().length > 1) {
-        <div class="reader__navigation">
-          <button
-            mat-button
-            [disabled]="busy() || pageIndex() <= 0"
-            (click)="move(-1)"
-          >
-            Previous lesson
-          </button>
-          <span
-            >Lesson {{ pageIndex() + 1 }} of
-            {{ pages().length }}</span
-          >
-          <button
-            mat-button
-            [disabled]="busy() || pageIndex() >= pages().length - 1"
-            (click)="move(1)"
-          >
-            Next lesson
-          </button>
+      @if (current()) {
+        <div class="reader__navigation" aria-label="Lesson navigation">
+          <button mat-button [disabled]="busy() || pageIndex() <= 0" (click)="move(-1)">Previous lesson</button>
+          @if (next(); as entry) {
+            @if (entry.kind === 'PAGE') { <button mat-flat-button [disabled]="busy() || loading() || !!error() || !!visitError()" (click)="read.emit(entry._id)">Continue: {{ entry.name }}</button> }
+            @else if (entry.kind === 'ASSESSMENT_TEST' && example()) { <button mat-flat-button [disabled]="busy()" (click)="assess.emit(entry.resourceId!)">Continue: {{ entry.name }}</button> }
+            @else if (nextUrl(); as href) {
+              @if (busy() || loading() || error() || visitError()) { <button mat-flat-button disabled>Continue: {{ entry.name }}</button> }
+              @else { <a mat-flat-button [href]="href" (click)="activity.emit({ url: href, event: $event })">Continue: {{ entry.name }}</a> }
+            }
+          } @else { <button mat-flat-button [disabled]="busy()" (click)="exit.emit()">Back to workshops</button> }
         </div>
       }
       <div class="reader__completion" aria-live="polite">
         @if (!example() && workshop().assessmentCount > 0 && !workshop().assessmentsCompleted) {
-          <p>After submitting the assessment, return here and refresh progress.</p>
+          <p>Use Return to workshop after submitting your assessment. Your progress updates when you return.</p>
         }
         <p>
           {{ workshop().viewedPageIds.length }} /
@@ -168,6 +105,7 @@ import { Workshop } from '../models/workshop.models';
           </button>
         }
       </div>
+      </div></div>
     </section>
   `,
   styles: [
@@ -175,40 +113,25 @@ import { Workshop } from '../models/workshop.models';
       :host {
         display: block;
       }
-      .reader {
-        padding: 1.5rem;
-        border: 1px solid var(--mat-sys-outline-variant);
-        border-radius: 1rem;
-      }
-      .reader__level {
-        color: var(--mat-sys-primary);
-      }
-      .reader__outline,
-      .reader__navigation {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      .reader__outline [aria-current] {
-        background: var(--mat-sys-secondary-container);
-      }
-      .reader__content {
-        padding: 1.5rem;
-        margin-block: 1.5rem;
-        max-width: 750px;
-        min-width: 0;
-        background: var(--mat-sys-surface-container-low);
-        border-radius: var(--mat-sys-corner-medium);
-        overflow-wrap: anywhere;
-      }
+      .reader { min-width: 0; }
+      .reader__level { color: var(--accent); font-size: 11px; letter-spacing: 1.5px; }
+      h2 { font-size: clamp(26px, 3vw, 36px); margin-bottom: 12px; }
+      .reader > p { color: var(--muted); line-height: 1.7; }
+      .reader__workspace { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 28px; margin-top: 28px; align-items: start; }
+      .reader__lesson { min-width: 0; }
+      .reader__content { padding: clamp(16px, 3vw, 28px); margin-block: 24px; min-width: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; overflow-wrap: anywhere; }
+      .reader__navigation { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+      .reader__navigation a, .reader__navigation button { height: auto; min-height: 40px; white-space: normal; text-align: left; }
+      @media (max-width: 850px) { .reader__workspace { grid-template-columns: 1fr; } }
       .reader__completion {
         display: grid;
         justify-items: start;
-        gap: 1rem;
+        gap: 12px;
+        padding-top: 20px;
         border-top: 1px solid var(--mat-sys-outline-variant);
         margin-top: 1rem;
       }
+      .reader__completion p { margin: 0; line-height: 1.6; }
       .reader__notice {
         color: var(--mat-sys-on-surface-variant);
         font-size: 0.875rem;
@@ -222,6 +145,7 @@ import { Workshop } from '../models/workshop.models';
 export class WorkshopReaderComponent {
   readonly workshop = input.required<Workshop>();
   readonly assessmentUrl = input.required<string>();
+  readonly labUrl = input.required<string>();
   readonly pageId = input('');
   readonly blocks = input<NgxEditorJsBlock[] | null>(null);
   readonly loading = input(false);
@@ -230,6 +154,7 @@ export class WorkshopReaderComponent {
   readonly read = output<string>();
   readonly seen = output<string>();
   readonly assess = output<string>();
+  readonly activity = output<{ url: string; event: MouseEvent }>();
   readonly example = input(false);
   readonly visitPending = input(false);
   readonly visitError = input('');
@@ -245,6 +170,13 @@ export class WorkshopReaderComponent {
   readonly pageIndex = computed(() =>
     this.pages().findIndex((p) => p._id === this.pageId())
   );
+  readonly current = computed(() => this.pages()[this.pageIndex()] ?? null);
+  readonly next = computed(() => this.entries().slice(this.entries().findIndex(e => e._id === this.pageId()) + 1)
+    .find(e => e.kind !== 'ASSESSMENT_TEST' || !e.resourceId || !this.workshop().completedAssessmentIds.includes(e.resourceId)) ?? null);
+  readonly nextUrl = computed(() => {
+    const entry = this.next();
+    return entry ? activityUrl(entry.kind === 'CODING_LAB' ? this.labUrl() : this.assessmentUrl(), entry.kind === 'CODING_LAB' ? 'lab' : 'test', entry.resourceId) : null;
+  });
   move(offset: number) {
     const page = this.pages()[this.pageIndex() + offset];
     if (page) this.read.emit(page._id);

@@ -2,11 +2,13 @@ import {
   DestroyRef,
   Injectable,
   computed,
+  effect,
+  untracked,
   inject,
   signal,
 } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -29,6 +31,10 @@ import { workshopError } from '../../utils/workshop-error';
 export class JourneyViewModel {
   private readonly store = inject(WorkshopStore);
   private readonly router = inject(Router, { optional: true });
+  private readonly route = inject(ActivatedRoute, { optional: true });
+  private readonly document = inject(DOCUMENT);
+  private requestedWorkshop: string | null = null;
+  private requestedPage: string | null = null;
   private readonly resets = new Subject<void>();
   private readonly destroy = inject(DestroyRef);
   private readonly commands = new Subject<{
@@ -164,7 +170,19 @@ export class JourneyViewModel {
         takeUntilDestroyed(this.destroy)
       )
       .subscribe();
-    const search = inject(DOCUMENT).location?.search ?? '';
+    const search = this.document.location?.search ?? '';
+    const restore = (params: URLSearchParams | import('@angular/router').ParamMap) => {
+      this.requestedWorkshop = params.get('workshop');
+      this.requestedPage = params.get('page');
+      if (!this.requestedWorkshop && this.selectedId()) this.close(false);
+      this.restoreSelection();
+    };
+    if (this.route) this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(restore);
+    else restore(new URLSearchParams(search));
+    effect(() => {
+      this.catalog();
+      untracked(() => this.restoreSelection());
+    });
     this.store.refresh(
       new URLSearchParams(search).get('workshopExample') === 'local'
     );
@@ -204,18 +222,21 @@ export class JourneyViewModel {
       ?.workshopDocuments.slice()
       .sort((a, b) => a.sortId - b.sortId)
       .find((p) => p.kind === 'PAGE');
-    if (first) this.read(first._id);
+    const resume = this.selected()?.workshopDocuments.slice().sort((a, b) => a.sortId - b.sortId).find(p => p.kind === 'PAGE' && !this.selected()?.viewedPageIds.includes(p._id));
+    if (resume || first) this.read((resume ?? first)!._id);
     else {
       this.pageId.set('');
       this.pages.next(null);
+      this.updateSelection(id, null);
     }
   }
-  close() {
+  close(updateUrl = true) {
     this.assessmentSection.set(null);
     this.visitError.set('');
     this.selectedId.set(null);
     this.pageId.set('');
     this.pages.next(null);
+    if (updateUrl) this.updateSelection(null, null);
   }
   read(pageId: string) {
     const id = this.selectedId();
@@ -223,6 +244,7 @@ export class JourneyViewModel {
       this.visitError.set('');
       this.pageId.set(pageId);
       this.pages.next({ id, pageId });
+      this.updateSelection(id, pageId);
     }
   }
   beginAssessment(sectionId: string) {
@@ -245,7 +267,51 @@ export class JourneyViewModel {
         workshopAssessment: this.workshopAssessment(),
       });
   }
-  assessmentUrl(sectionId: string) {
-    return `/take-assessment-test/overview?view=subject&subject=${encodeURIComponent(sectionId)}`;
+  private restoreSelection() {
+    if (!this.requestedWorkshop || !this.catalog()) return;
+    const workshop = this.catalog()?.sections.flatMap(s => s.workshops).find(w => w._id === this.requestedWorkshop);
+    if (!workshop) {
+      this.close(false);
+      this.message.set('This workshop is unavailable. Choose an available workshop to continue.');
+      return;
+    }
+    const page = workshop.workshopDocuments.find(p => p.kind === 'PAGE' && p._id === this.requestedPage)
+      ?? workshop.workshopDocuments.slice().sort((a, b) => a.sortId - b.sortId).find(p => p.kind === 'PAGE');
+    if (this.selectedId() === workshop._id && this.pageId() === (page?._id ?? '')) return;
+    this.selectedId.set(workshop._id);
+    if (page) this.read(page._id);
+    else { this.pageId.set(''); this.pages.next(null); }
+  }
+  private updateSelection(workshop: string | null, page: string | null) {
+    this.requestedWorkshop = workshop;
+    this.requestedPage = page;
+    if (this.router) void this.router.navigate([], {
+      relativeTo: this.route ?? undefined, queryParams: { workshop, page }, queryParamsHandling: 'merge',
+    });
+  }
+  activity({ url, event }: { url: string; event: MouseEvent }) {
+    if (this.router && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.button === 0) {
+      event.preventDefault();
+      if (!this.busy()) void this.router.navigateByUrl(url);
+    }
+  }
+  assessmentUrl(sectionId: string, test?: string) {
+    const params = new URLSearchParams({ view: 'subject', subject: sectionId });
+    if (test) params.set('test', test);
+    return this.activityUrl('/take-assessment-test/overview', params);
+  }
+  labUrl(lab: string) {
+    return this.activityUrl('/coding-labs/hello-world', new URLSearchParams({ lab }));
+  }
+  private activityUrl(path: string, params: URLSearchParams) {
+    const workshop = this.selected();
+    const selection = new URLSearchParams();
+    if (workshop) {
+      selection.set('workshop', workshop._id);
+      if (this.pageId()) selection.set('page', this.pageId());
+      params.set('workshopName', workshop.name);
+    }
+    params.set('returnTo', '/workshops/overview' + (selection.size ? '?' + selection.toString() : ''));
+    return path + '?' + params.toString();
   }
 }
