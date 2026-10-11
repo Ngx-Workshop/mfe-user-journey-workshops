@@ -26,6 +26,13 @@ production build. Deployment also runs the architecture guard before building.
 Auth/gateway/host integration must be verified separately with test records.
 No end-to-end framework or general-purpose lint dependency is introduced.
 
+The active deployment workflow is `.github/workflows/deploy.yml`. It deploys on
+pushes to `main` and supports manual `workflow_dispatch` runs on `main`; other
+branches do not deploy. `.ngx-workshop/workflows/deploy.yml` is the stored CLI
+template, not a workflow GitHub executes. Keep these triggers aligned when
+regenerating the CLI-managed workflow. Deployment requires `MFE_DROPLET_IP`,
+`MFE_SSH_PRIVATE_KEY`, and `MFE_SSH_HOST_FINGERPRINT` repository secrets.
+
 For UI changes inspect loading/empty/error/success states, keyboard form submission,
 validation, dialog retry and narrow layouts. Static bundle serving does not proxy
 /api; supply an explicit local gateway or synthetic fixtures. Host development
