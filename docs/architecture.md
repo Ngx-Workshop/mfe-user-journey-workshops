@@ -44,3 +44,9 @@ The remote sends POST workshops/:id/pages/:pageId/seen to record rendered pages 
 ## Workshop continuity — 2026-10-11
 
 See [003 continuity](../specs/003-workshop-continuity/handoff.md). Workshop reader route is `/workshops/overview`, matching its executable Routes. Activities accept `returnTo` (validated to that reader route and workshop/page query keys) and `workshopName`. Assessments accept an exact `test` definition ID; labs accept an exact published `lab` ID. Activity navigation merges query context; return reloads the server catalog and restores the lesson. No automatic starts or altered completion policy. Host Router owns cross-remote navigation; no nested remotes.
+
+### Workshop overview refinement
+`components/workshop-catalog.component.ts` owns typed catalog presentation; `workshop-section.component.ts` presents placement and ordered level groups. Scoped JourneyViewModel owns overview filter/search state. Completed workshop retake uses the reader GET, preserving server completion and unlocked levels. Local preview controls are absent from learner UI; development examples remain URL opt-in. No live progress reset or assessment-history deletion is performed.
+
+### Automatic workshop return
+Workshop context now returns automatically on confirmed assignment submission: assessment finish or a completed coding-lab submit response. Return uses the validated workshop/page destination with replaceUrl. Save-only, failures and historical loads keep their current views; ordinary result navigation remains for assignments without workshop context. Workshop return reloads authoritative progress. Learner copy explains the automatic return.

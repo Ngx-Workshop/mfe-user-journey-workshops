@@ -81,6 +81,9 @@ export class JourneyViewModel {
     Validators.required
   );
   readonly message = signal('');
+  readonly overviewView = signal<'active' | 'completed'>('active');
+  readonly search = signal('');
+  readonly assessmentLinks = computed(() => Object.fromEntries(this.sections().map(s => [s.sectionId, this.assessmentUrl(s.sectionId)])));
   readonly sections = computed(() => this.catalog()?.sections ?? []);
   constructor() {
     this.commands
@@ -208,6 +211,9 @@ export class JourneyViewModel {
   start(workshop: Workshop) {
     if (!this.busy())
       this.commands.next({ id: workshop._id, action: 'start' });
+  }
+  retake(workshop: Workshop) {
+    if (!this.busy() && !this.loading() && workshop.status === 'completed') this.open(workshop._id);
   }
   seen(pageId: string) {
     const workshop = this.selected();

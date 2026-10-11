@@ -5,6 +5,9 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
+import { By } from '@angular/platform-browser';
+import { WorkshopJourneyComponent } from '../../src/app/features/workshop-journey/pages/journey/workshop-journey.component';
+const importedJourney = By.directive(WorkshopJourneyComponent);
 import { App } from '../../src/app/app';
 import { catalog, workshop } from '../fixtures/workshop-catalog';
 
@@ -143,7 +146,8 @@ describe('Workshop journey', () => {
       Array.from(element.querySelectorAll('button')).find((b) =>
         b.textContent?.includes(label)
       )!;
-    button('Try local example').click();
+    const journey = fixture.debugElement.query(importedJourney);
+    journey.componentInstance.vm.changeMode(true);
     const sampleBase =
       'http://localhost:3004/user-metadata/workshop-progress';
     http
@@ -202,4 +206,47 @@ describe('Workshop journey', () => {
       'No workshop sections have been added yet'
     );
   });
+  it('organizes workshops by level and progress, filters the list, and retakes a completed workshop without erasing progress', () => {
+    const fixture = render();
+    const completed = { ...workshop, _id: 'completed', name: 'Finished foundations', status: 'completed' as const, viewedPageIds: ['page1'] };
+    const progress = catalog();
+    progress.sections[0] = { ...progress.sections[0], unlockedLevel: 2, totalCount: 4, completedCount: 1, lockedCount: 0, workshops: [
+      { ...workshop, _id: 'later', name: 'Later level', level: 2 },
+      { ...workshop, _id: 'ready', name: 'Ready workshop', sortId: 0 },
+      completed,
+      { ...workshop, _id: 'resume', name: 'Continue this workshop', status: 'in-progress', sortId: 1 },
+    ] };
+    http.expectOne(base).flush(progress); fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const titles = () => Array.from(element.querySelectorAll('.section__row h4')).map(h => h.textContent?.trim());
+    expect(titles()).toEqual(['Continue this workshop', 'Ready workshop', 'Later level']);
+    expect(element.textContent).not.toContain('Local preview options');
+    expect(element.textContent).not.toContain('Try local example');
+    const search = element.querySelector<HTMLInputElement>('input[type=search]')!;
+    search.value = 'Ready workshop'; search.dispatchEvent(new Event('input')); fixture.detectChanges();
+    expect(titles()).toEqual(['Ready workshop']);
+    search.value = 'missing'; search.dispatchEvent(new Event('input')); fixture.detectChanges();
+    expect(element.textContent).toContain('No matching workshops');
+    Array.from(element.querySelectorAll('button')).find(b => b.textContent?.includes('Clear search'))!.click(); fixture.detectChanges();
+    element.querySelectorAll<HTMLButtonElement>('.catalog__views button')[1].click(); fixture.detectChanges();
+    expect(titles()).toEqual(['Finished foundations']);
+    expect(element.textContent).toContain('Your completion and unlocked levels stay yours');
+    Array.from(element.querySelectorAll('button')).find(b => b.textContent?.includes('Retake workshop'))!.click();
+    http.expectOne(`${base}/workshops/completed/pages/page1`).flush({ name: 'Getting started', html: '[]' }); fixture.detectChanges();
+    expect(element.querySelector('ngx-workshop-reader')?.textContent).toContain('Finished foundations');
+    expect(element.textContent).toContain('Workshop complete.');
+    expect(element.textContent).toContain('1 / 1 pages seen');
+    http.expectNone(request => request.method === 'POST');
+    Array.from(element.querySelectorAll('button')).find(b => b.textContent?.includes('Back to workshops'))!.click(); fixture.detectChanges();
+    expect(titles()).toEqual(['Finished foundations']);
+  });
+  it('offers an empty completed list without hiding available workshops', () => {
+    const fixture = render(); http.expectOne(base).flush(catalog()); fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    element.querySelectorAll<HTMLButtonElement>('.catalog__views button')[1].click(); fixture.detectChanges();
+    expect(element.textContent).toContain('Your completed workshops will appear here');
+    element.querySelector<HTMLButtonElement>('.catalog__views button')!.click(); fixture.detectChanges();
+    expect(element.textContent).toContain('First component');
+  });
+
 });

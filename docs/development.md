@@ -76,3 +76,6 @@ The checkbox and complete command were removed. Seen pages are saved after succe
 ## Continuity verification — 2026-10-11
 
 12 ChromeHeadless tests and an isolated optimized build passed for this checkout. Synthetic desktop (1366px) and phone (390px) browser previews had no page errors or horizontal overflow. See [handoff](../specs/003-workshop-continuity/handoff.md) for evidence and the pending signed-in shell walkthrough. Use `/workshops/overview` for workshop returns; earlier `hello-world` workshop examples are outdated. Standalone lab providers now register exported Routes; cross-remote return paths still require host routing.
+
+### Learner overview
+The local preview switch/reset controls were removed. Developers may still opt in using `?workshopExample=local`; sample assessment tests access the scoped VM rather than a learner-facing switch. Current workshop suite: 14 passing ChromeHeadless tests, plus synthetic overview browser checks at 1366px/390px. Completed workshop Retake is a preserved-progress review from the first lesson.

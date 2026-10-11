@@ -14,3 +14,15 @@ AC-003: Returning reloads authoritative workshop progress and restores the selec
 AC-004: Loading, retry, completion, keyboard focus and narrow layouts remain usable. Existing standalone discovery continues to work.
 
 No scoring, completion policy, API payload, federation export or deployment change. Labs remain optional practice under current server completion policy. Local example stays explicit.
+
+## Overview refinement — 2026-10-11
+FR-005: Remove learner-facing local preview controls; developer example remains opt-in by URL.
+FR-006: Organize available/in-progress workshops by section and level, with searchable active/completed views, useful counts and empty states.
+FR-007: Completed workshops have a Retake workshop action that opens their first lesson without deleting earned completion, assessments or unlocked levels.
+AC-005: Live overview contains no local preview actions; search and view filters expose matching workshops, ordered by level and progress.
+AC-006: Retaking a completed workshop loads its first lesson, keeps its completed status and makes no reset/start/progress write for already-seen pages.
+Decision: deliver retake/review, not a destructive reset. There is no live per-workshop reset API, and assessment evidence belongs to another service. Retake explicitly retains earned progress.
+
+## Automatic completion return — 2026-10-11
+FR-008: After a workshop-launched assignment is confirmed completed by the server, automatically return to the validated workshop destination, restoring the saved lesson and refreshed progress. Regular standalone assignments retain result views.
+AC-007: Successful assessment completion and completed lab submission navigate to the workshop with replaceUrl. Saved code alone, failed save/submit, and opening historical completed work do not trigger automatic return. Invalid/missing return context keeps ordinary result behavior. Lab completion is determined by persisted status, not passing score.

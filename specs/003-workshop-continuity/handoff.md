@@ -24,3 +24,18 @@ X001: release all three compatible remotes, then verify signed-in placement → 
 
 ## Context
 Architecture and development guides describe the additive navigation contract. Preview images alongside this handoff are synthetic review artifacts.
+
+## Overview refinement — 2026-10-11
+
+Removed Local preview options and all example-switch/reset controls from the learner composition. Connection/unavailable messages no longer suggest developer example services. Development sample mode remains explicit through `?workshopExample=local`.
+
+New catalog and section presentation components provide search, Continue learning/Completed views, aggregate counts, level groups, compact rows, and in-progress-first ordering within each level. Empty search/completed states offer recovery. The composition is now below the approximate component size guideline.
+
+Completed workshops offer Retake workshop. This loads the first lesson through the existing authorized reader endpoint, preserves completion/unlocked levels, and makes no start/reset or seen write for already-viewed pages. It is a reread/review action; assessment attempt history is not reset. There is no new reset endpoint or data erasure.
+
+Verification: 14 ChromeHeadless tests pass, including rendered ordering/search, missing developer controls, empty completed state, and reopening completed content without POST writes. Production build, architecture guard, unused-symbol type checks and diff whitespace checks pass. Four synthetic desktop/mobile overview screenshots show no horizontal overflow or page errors; browser walkthrough reopens completed content successfully. API fixtures are synthetic; signed-in host integration remains X001.
+
+## Automatic completion return — 2026-10-11
+Workshop-launched assignments now return automatically to validated returnTo after confirmed completion, using replaceUrl and retaining workshop/page selection. Assessment runner emits finish only after successful submission or owned completed-result reconciliation; the journey redirects instead of opening result. Lab VM redirects only from a completed active submit response, after updating its saved attempt; the captured return destination must still match current context. Nonpassing but completed lab attempts also return, following persisted status. Save-only, failed save/submit, noncompleted responses and historical loads do not redirect. Missing/invalid context keeps ordinary result/history behavior. Workshop constructor reloads progress and restores the lesson; scoring, API contracts and completion policy are unchanged.
+
+Verification: 14 ChromeHeadless tests passed in this repository (63 combined: 14 workshops, 23 coding labs, 26 assessments). Isolated production build passed at /tmp/mfe-user-journey-workshops-autoreturn-build. Source type/unused checks and diff checks passed; architecture guards passed where provided. Tests use HTTP/Router doubles, covering redirect destination, replaceUrl, submission retry, persisted status, historical results and invalid/standalone contexts alongside existing runner persistence/reconciliation tests. No new signed-in host walkthrough or deployment was performed; X001 remains the release integration check.

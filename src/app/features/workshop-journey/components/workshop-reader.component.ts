@@ -67,7 +67,7 @@ import { Workshop } from '../models/workshop.models';
       }
       <div class="reader__completion" aria-live="polite">
         @if (!example() && workshop().assessmentCount > 0 && !workshop().assessmentsCompleted) {
-          <p>Use Return to workshop after submitting your assessment. Your progress updates when you return.</p>
+          <p>After you submit your assignment, you’ll return to this workshop automatically. Your progress updates when you return.</p>
         }
         <p>
           {{ workshop().viewedPageIds.length }} /
