@@ -22,8 +22,10 @@ describe('Workshop activity continuity', () => {
     expect(vm.selectedId()).toBe('w1'); expect(vm.pageId()).toBe('page2');
     const assessment = new URL(vm.assessmentUrl('angular', 'test/one'), 'https://example.test');
     expect(assessment.searchParams.get('test')).toBe('test/one');
+    expect(assessment.searchParams.get('launch')).toBe('direct');
     expect(assessment.searchParams.get('returnTo')).toBe('/workshops/overview?workshop=w1&page=page2');
     const lab = new URL(vm.labUrl('lab/one'), 'https://example.test');
+    expect(lab.searchParams.get('launch')).toBe('direct');
     expect(lab.searchParams.get('lab')).toBe('lab/one'); expect(lab.searchParams.get('workshopName')).toBe(workshop.name);
     const click = new MouseEvent('click', { cancelable: true });
     vm.activity({ url: lab.pathname + lab.search, event: click });
