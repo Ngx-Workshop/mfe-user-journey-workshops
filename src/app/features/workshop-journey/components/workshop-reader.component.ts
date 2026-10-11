@@ -2,15 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
   signal,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import {
   NgxEditorJs2Component,
   NgxEditorJsBlock,
 } from '@tmdjr/ngx-editor-js2';
-import { MatButtonModule } from '@angular/material/button';
 import { Workshop } from '../models/workshop.models';
 
 @Component({
@@ -26,71 +27,64 @@ import { Workshop } from '../models/workshop.models';
       <h2>{{ workshop().name }}</h2>
       <p>{{ workshop().summary }}</p>
       <nav class="reader__outline" aria-label="Workshop contents">
-        @for (entry of entries(); track entry._id) {
-          @if (entry.kind === 'PAGE') {
-            <button
-              mat-button
-              [attr.aria-current]="
-                pageId() === entry._id ? 'step' : null
-              "
-              (click)="read.emit(entry._id)"
-            >
-              {{ entry.name }}
-            </button>
-          } @else if (entry.kind === 'ASSESSMENT_TEST') {
-            <a mat-button [href]="assessmentUrl()"
-              >{{ entry.name }} (assessment)</a
-            >
-          } @else {
-            <p class="reader__reference">
-              {{ entry.name }} — coding lab: {{ entry.resourceId }}
-            </p>
-          }
-        } @empty {
-          <p>No lesson pages have been added to this workshop.</p>
+        @for (entry of entries(); track entry._id) { @if (entry.kind
+        === 'PAGE') {
+        <button
+          mat-button
+          [attr.aria-current]="pageId() === entry._id ? 'step' : null"
+          (click)="read.emit(entry._id)"
+        >
+          {{ entry.name }}
+        </button>
+        } @else if (entry.kind === 'ASSESSMENT_TEST') {
+        <a mat-button [href]="assessmentUrl()"
+          >{{ entry.name }} (assessment)</a
+        >
+        } @else {
+        <p class="reader__reference">
+          {{ entry.name }} — coding lab: {{ entry.resourceId }}
+        </p>
+        } } @empty {
+        <p>No lesson pages have been added to this workshop.</p>
         }
       </nav>
       @if (loading()) {
-        <p role="status">Loading lesson…</p>
-      }
-      @if (error()) {
-        <p role="alert">{{ error() }}</p>
-        <button mat-button (click)="read.emit(pageId())">
-          Retry lesson
+      <p role="status">Loading lesson…</p>
+      } @if (error()) {
+      <p role="alert">{{ error() }}</p>
+      <button mat-button (click)="read.emit(pageId())">
+        Retry lesson
+      </button>
+      } @if (blocks(); as lessonBlocks) {
+      <article class="reader__content" aria-label="Lesson content">
+        <p class="reader__notice">
+          Edits here are temporary and are not saved.
+        </p>
+        <ngx-editor-js2
+          [blocks]="lessonBlocks"
+          [requestBlocks]="null"
+        />
+      </article>
+      } @if (pages().length > 1) {
+      <div class="reader__navigation">
+        <button
+          mat-button
+          [disabled]="pageIndex() <= 0"
+          (click)="move(-1)"
+        >
+          Previous lesson
         </button>
-      }
-      @if (blocks(); as lessonBlocks) {
-        <article class="reader__content" aria-label="Lesson content">
-          <p class="reader__notice">
-            Edits here are temporary and are not saved.
-          </p>
-          <ngx-editor-js2
-            [blocks]="lessonBlocks"
-            [requestBlocks]="null"
-          />
-        </article>
-      }
-      @if (pages().length > 1) {
-        <div class="reader__navigation">
-          <button
-            mat-button
-            [disabled]="pageIndex() <= 0"
-            (click)="move(-1)"
-          >
-            Previous lesson
-          </button>
-          <span
-            >Lesson {{ pageIndex() + 1 }} of
-            {{ pages().length }}</span
-          >
-          <button
-            mat-button
-            [disabled]="pageIndex() >= pages().length - 1"
-            (click)="move(1)"
-          >
-            Next lesson
-          </button>
-        </div>
+        <span
+          >Lesson {{ pageIndex() + 1 }} of {{ pages().length }}</span
+        >
+        <button
+          mat-button
+          [disabled]="pageIndex() >= pages().length - 1"
+          (click)="move(1)"
+        >
+          Next lesson
+        </button>
+      </div>
       }
       <div class="reader__completion">
         <p>
@@ -193,5 +187,12 @@ export class WorkshopReaderComponent {
   move(offset: number) {
     const page = this.pages()[this.pageIndex() + offset];
     if (page) this.read.emit(page._id);
+  }
+
+  constructor() {
+    effect(() => {
+      console.log('Current page index:', this.pageIndex());
+      console.log('Current blocks:', this.blocks());
+    });
   }
 }
