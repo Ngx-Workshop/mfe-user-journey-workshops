@@ -35,7 +35,7 @@ The generated `@tmdjr/user-metadata-contracts` 0.0.53 types are installed from t
 | POST | …/workshops/:id/complete | Validating compatibility endpoint; no completion override |
 | GET | …/workshops/:id/pages/:pageId | WorkshopReadingDto |
 
-The explicit local example substitutes `http://localhost:3004/user-metadata/workshop-progress` and adds POST `example-assessments/:sectionId` and POST `example-reset`. These sample commands return 404 outside explicit isolated example mode. The backend guards loopback/origin/database and uses the existing synthetic local identity. No live initial test is faked: live test links use `/take-assessment-test/overview?view=subject&subject=<section ID>`. Coding-lab references now link to the learner lab remote at `/coding-labs/hello-world` with exact resource and return context. Coding lab grading remains owned by its services.
+The explicit local example substitutes `http://localhost:3004/user-metadata/workshop-progress` and adds POST `example-assessments/:sectionId` and POST `example-reset`. These sample commands return 404 outside explicit isolated example mode. The backend guards loopback/origin/database and uses the existing synthetic local identity. No live initial test is faked: live test links use `/take-assessment-test/overview?view=subject&subject=<section ID>`. Coding-lab references now link to the learner lab remote at `/coding-labs/explore` with exact resource and return context. Coding lab grading remains owned by its services.
 
 Backend upstreams `DOCKER_NET_NAME_DOCUMENT` and `DOCKER_NET_NAME_ASSESSMENT` must be configured with trusted API prefixes. Server forwards only session Cookie and Authorization, and never a client-selected upstream. See the service guide for rollout. Existing service/gateway deployment is external integration work.
 
@@ -53,3 +53,5 @@ Workshop context now returns automatically on confirmed assignment submission: a
 
 ### Direct workshop assignment links
 Explicit resource links include `launch=direct`. After authoritative catalog/history loading, the scoped activity VM starts or resumes the exact eligible resource once, removes launch on internal navigation, and preserves returnTo/workshopName. Assessment completed references open saved results. Missing/locked resources and failed starts do not loop; explicit Refresh retries. This supersedes discovery-only entry for workshop assignment links. Ordinary discovery and placement remain available.
+
+Workshop coding-lab links target the canonical explore route with lab and launch=direct; the lab remote resolves server-owned attempt IDs and routes to attempts/:attemptId or results/:attemptId. Outline and next-activity links reuse the same base URL and preserve returnTo/workshopName.

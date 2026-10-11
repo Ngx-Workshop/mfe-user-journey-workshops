@@ -12,3 +12,5 @@
 - [x] T008 Verify completion/error/standalone/history paths and document checks (AC-007).
 
 - [x] T009 Implement and verify direct assignment launch (FR-009 / AC-008).
+
+- [x] T010 Update canonical lab links and verify shared reader/outline URL composition (FR-010 / AC-009).

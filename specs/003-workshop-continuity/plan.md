@@ -14,3 +14,6 @@ Assessment runner's confirmed completion event routes to validated returnTo inst
 
 ### Direct assignment entry
 Add launch=direct to workshop resource URLs. Scoped VMs resolve exact catalog resource after loading, consume each launch key once, reuse known active/assessment completed attempts, otherwise issue existing start commands. Internal navigation removes launch while merging workshop return context; direct attempt navigation replaces the launch entry. Explicit Refresh retries a failed launch. Show opening progress while start is pending; ordinary discovery remains unaffected. Validate direct start/resume, missing/locked resources, retry and preserved return context through HTTP/Router tests.
+
+### Canonical lab route
+Update JourneyViewModel.labUrl to /coding-labs/explore; reader/outline activityUrl composition inherits the canonical base. Preserve resource and workshop query context. Extend the existing continuity regression to verify the target and composed reader URL; run workshop tests, architecture/types and an isolated production build. No external writes or API changes.

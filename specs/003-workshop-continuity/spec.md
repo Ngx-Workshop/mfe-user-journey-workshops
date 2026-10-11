@@ -31,3 +31,6 @@ AC-007: Successful assessment completion and completed lab submission navigate t
 FR-009: Workshop links open the referenced lab/test directly, starting or resuming an eligible assignment without a discovery click. Completed assessments open their existing result; coding labs resume active work or start a fresh attempt according to existing retry rules. Missing/locked resources and request failures remain recoverable. Preserve automatic completion return.
 AC-008: launch=direct plus exact resource identity opens the assignment once after catalog/history load; no duplicate starts on rerender, no automatic retry after errors, and no starts for missing/locked resources. Ordinary discovery links without launch retain existing behavior.
 This supersedes the earlier no-auto-start decision for explicit workshop assignment links. Backend eligibility, ownership and scoring remain unchanged.
+
+## Canonical coding-lab links — 2026-10-11
+FR-010 / AC-009: Workshop coding-lab links use /coding-labs/explore with exact lab identity, launch=direct, workshopName and lesson returnTo. Outline and next activity preserve this contract; the coding-lab remote owns attempt/result path selection. This supersedes the previous hello-world target.

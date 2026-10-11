@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { JourneyViewModel } from '../../../../../../src/app/features/workshop-journey/pages/journey/journey.view-model';
+import { activityUrl } from '../../../../../../src/app/features/workshop-journey/utils/activity-url';
 import { catalog, workshop } from '../../../../../fixtures/workshop-catalog';
 
 describe('Workshop activity continuity', () => {
@@ -25,11 +26,16 @@ describe('Workshop activity continuity', () => {
     expect(assessment.searchParams.get('launch')).toBe('direct');
     expect(assessment.searchParams.get('returnTo')).toBe('/workshops/overview?workshop=w1&page=page2');
     const lab = new URL(vm.labUrl('lab/one'), 'https://example.test');
+    expect(lab.pathname).toBe('/coding-labs/explore');
+    expect(lab.searchParams.get('returnTo')).toBe('/workshops/overview?workshop=w1&page=page2');
+    const readerLab = new URL(activityUrl(vm.labUrl(''), 'lab', 'lab/one')!, 'https://example.test');
+    expect(readerLab.pathname).toBe(lab.pathname);
+    expect([...readerLab.searchParams.entries()].sort()).toEqual([...lab.searchParams.entries()].sort());
     expect(lab.searchParams.get('launch')).toBe('direct');
     expect(lab.searchParams.get('lab')).toBe('lab/one'); expect(lab.searchParams.get('workshopName')).toBe(workshop.name);
     const click = new MouseEvent('click', { cancelable: true });
     vm.activity({ url: lab.pathname + lab.search, event: click });
-    expect(click.defaultPrevented).toBeTrue(); expect(router.navigateByUrl).toHaveBeenCalled();
+    expect(click.defaultPrevented).toBeTrue(); expect(router.navigateByUrl).toHaveBeenCalledWith(lab.pathname + lab.search);
     const modifiedClick = new MouseEvent('click', { cancelable: true, ctrlKey: true });
     vm.activity({ url: lab.pathname + lab.search, event: modifiedClick });
     expect(modifiedClick.defaultPrevented).toBeFalse(); expect(router.navigateByUrl).toHaveBeenCalledTimes(1);

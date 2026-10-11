@@ -309,7 +309,7 @@ export class JourneyViewModel {
   labUrl(lab: string) {
     const params = new URLSearchParams({ lab });
     if (lab) params.set('launch', 'direct');
-    return this.activityUrl('/coding-labs/hello-world', params);
+    return this.activityUrl('/coding-labs/explore', params);
   }
   private activityUrl(path: string, params: URLSearchParams) {
     const workshop = this.selected();
