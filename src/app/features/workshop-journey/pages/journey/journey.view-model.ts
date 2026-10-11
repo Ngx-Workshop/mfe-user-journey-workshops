@@ -13,6 +13,7 @@ import {
   EMPTY,
   Subject,
   catchError,
+  concatMap,
   exhaustMap,
   finalize,
   switchMap,
@@ -32,19 +33,29 @@ export class JourneyViewModel {
   private readonly destroy = inject(DestroyRef);
   private readonly commands = new Subject<{
     id: string;
-    action: 'start' | 'complete';
+    action: 'start';
   }>();
   private readonly assessments = new Subject<{
     sectionId: string;
     answer: SampleAnswer;
+    workshopAssessment: boolean;
   }>();
   private readonly pages = new Subject<{
     id: string;
     pageId: string;
   } | null>();
+  private readonly visits = new Subject<{
+    id: string;
+    pageId: string;
+  }>();
+  readonly visitError = signal('');
+  readonly visitPending = signal(false);
+  readonly workshopAssessment = signal(false);
   readonly catalog = this.store.catalog;
   readonly loading = this.store.loading;
-  readonly busy = this.store.busy;
+  readonly busy = computed(
+    () => this.store.busy() || this.visitPending()
+  );
   readonly error = this.store.error;
   readonly example = this.store.example;
   readonly selectedId = signal<string | null>(null);
@@ -71,13 +82,7 @@ export class JourneyViewModel {
         exhaustMap((command) =>
           this.store.command(command.id, command.action).pipe(
             tap(() => {
-              if (command.action === 'start') this.open(command.id);
-              else {
-                this.close();
-                this.message.set(
-                  'Workshop completed. Your available workshops have been updated.'
-                );
-              }
+              this.open(command.id);
             })
           )
         ),
@@ -87,16 +92,20 @@ export class JourneyViewModel {
     this.assessments
       .pipe(
         exhaustMap((a) =>
-          this.store.assess(a.sectionId, a.answer).pipe(
-            tap((result) => {
-              this.assessmentSection.set(null);
-              this.message.set(
-                result.correct
-                  ? 'Correct. Initial assessment completed; level 1 is available.'
-                  : 'A component combines a template and behavior. Assessment completed; start with level 1.'
-              );
-            })
-          )
+          this.store
+            .assess(a.sectionId, a.answer, a.workshopAssessment)
+            .pipe(
+              tap((result) => {
+                this.assessmentSection.set(null);
+                this.message.set(
+                  a.workshopAssessment
+                    ? 'Workshop assessment completed. Progress has been updated.'
+                    : result.correct
+                      ? 'Correct. Initial assessment completed; level 1 is available.'
+                      : 'A component combines a template and behavior. Assessment completed; start with level 1.'
+                );
+              })
+            )
         ),
         takeUntilDestroyed(this.destroy)
       )
@@ -139,6 +148,22 @@ export class JourneyViewModel {
         takeUntilDestroyed(this.destroy)
       )
       .subscribe();
+    this.visits
+      .pipe(
+        concatMap((page) => {
+          this.visitPending.set(true);
+          this.visitError.set('');
+          return this.store.seen(page.id, page.pageId).pipe(
+            catchError((error) => {
+              this.visitError.set(workshopError(error));
+              return EMPTY;
+            }),
+            finalize(() => this.visitPending.set(false))
+          );
+        }),
+        takeUntilDestroyed(this.destroy)
+      )
+      .subscribe();
     const search = inject(DOCUMENT).location?.search ?? '';
     this.store.refresh(
       new URLSearchParams(search).get('workshopExample') === 'local'
@@ -166,14 +191,15 @@ export class JourneyViewModel {
     if (!this.busy())
       this.commands.next({ id: workshop._id, action: 'start' });
   }
-  complete() {
+  seen(pageId: string) {
     const workshop = this.selected();
-    if (workshop && !this.busy())
-      this.commands.next({ id: workshop._id, action: 'complete' });
+    if (workshop && !workshop.viewedPageIds.includes(pageId))
+      this.visits.next({ id: workshop._id, pageId });
   }
   open(id: string) {
     this.selectedId.set(id);
     this.message.set('');
+    this.visitError.set('');
     const first = this.selected()
       ?.workshopDocuments.slice()
       .sort((a, b) => a.sortId - b.sortId)
@@ -185,6 +211,8 @@ export class JourneyViewModel {
     }
   }
   close() {
+    this.assessmentSection.set(null);
+    this.visitError.set('');
     this.selectedId.set(null);
     this.pageId.set('');
     this.pages.next(null);
@@ -192,19 +220,30 @@ export class JourneyViewModel {
   read(pageId: string) {
     const id = this.selectedId();
     if (id) {
+      this.visitError.set('');
       this.pageId.set(pageId);
       this.pages.next({ id, pageId });
     }
   }
   beginAssessment(sectionId: string) {
     this.answer.reset();
+    this.workshopAssessment.set(false);
     this.assessmentSection.set(sectionId);
+  }
+  beginWorkshopAssessment(testId: string) {
+    this.answer.reset();
+    this.workshopAssessment.set(true);
+    this.assessmentSection.set(testId);
   }
   submitAssessment() {
     const sectionId = this.assessmentSection();
     const answer = this.answer.value;
     if (sectionId && answer && !this.busy())
-      this.assessments.next({ sectionId, answer });
+      this.assessments.next({
+        sectionId,
+        answer,
+        workshopAssessment: this.workshopAssessment(),
+      });
   }
   assessmentUrl(sectionId: string) {
     return `/take-assessment-test/overview?view=subject&subject=${encodeURIComponent(sectionId)}`;

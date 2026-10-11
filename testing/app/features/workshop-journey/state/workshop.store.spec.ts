@@ -47,12 +47,12 @@ describe('WorkshopStore', () => {
   it('a completion response wins over an older catalog response', () => {
     store.refresh();
     const old = http.expectOne(base);
-    store.command('w1', 'complete').subscribe();
+    store.seen('w1', 'page1').subscribe();
     const completed = {
       ...catalog(),
       sections: [{ ...catalog().sections[0], completedCount: 1 }],
     };
-    http.expectOne(`${base}/workshops/w1/complete`).flush(completed);
+    http.expectOne(`${base}/workshops/w1/pages/page1/seen`).flush(completed);
     old.flush(catalog());
     expect(store.catalog()?.sections[0].completedCount).toBe(1);
     expect(store.busy()).toBeFalse();

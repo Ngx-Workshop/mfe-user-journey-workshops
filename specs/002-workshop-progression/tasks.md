@@ -12,3 +12,5 @@ Updated: 2026-10-10
 T001/T003: service tests (35) and real local HTTP/Mongo verifier passed. T002/T004: 22 ChromeHeadless tests, strict unused/type check, architecture check, production remote build and generated contract build passed. T005: hosted beta shell loaded the rebuilt remote; assessment gate, two required completions, independent second section and reload persistence observed. `verified-example.jpg` captures level 2 unlocked. X001 remains pending: no package publication or live service deployment was performed.
 
 - [x] T006 — Use ngx-editor-js2 for workshop pages without document persistence; AC-007. Verified 23 ChromeHeadless tests, architecture/type checks, isolated production build and local browser edit/reopen (original content restored).
+
+- [x] T007 — Replace self-attested completion with distinct persisted page visits and exact assessment completion; AC-008. Added authenticated seen endpoint, automatic catalog reconciliation, page counts and retry; generated/packed contract 0.0.53. Verified 41 service tests, 11 active remote tests, local HTTP/Mongo and browser pages→reload→assessment→automatic completion.

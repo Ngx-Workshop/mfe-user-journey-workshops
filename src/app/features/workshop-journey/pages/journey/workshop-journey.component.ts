@@ -86,6 +86,44 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
           {{ vm.message() }}
         </p>
       }
+      @if (vm.assessmentSection()) {
+        <form
+          class="journey__assessment"
+          (submit)="$event.preventDefault(); vm.submitAssessment()"
+        >
+          <fieldset [disabled]="vm.busy()">
+            <legend>
+              Which Angular building block combines a template and
+              behavior?
+            </legend>
+            <label
+              ><input
+                type="radio"
+                name="answer"
+                value="component"
+                [formControl]="vm.answer"
+              />
+              A component</label
+            >
+            <label
+              ><input
+                type="radio"
+                name="answer"
+                value="database"
+                [formControl]="vm.answer"
+              />
+              A database index</label
+            >
+          </fieldset>
+          <button
+            mat-flat-button
+            type="submit"
+            [disabled]="!vm.answer.value || vm.busy()"
+          >
+            Submit assessment
+          </button>
+        </form>
+      }
       @if (vm.selected(); as workshop) {
         <ngx-workshop-reader
           [workshop]="workshop"
@@ -96,7 +134,11 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
           [busy]="vm.busy()"
           [assessmentUrl]="vm.assessmentUrl(workshop.sectionId)"
           (read)="vm.read($event)"
-          (finish)="vm.complete()"
+          [example]="vm.example()"
+          [visitError]="vm.visitError()"
+          [visitPending]="vm.visitPending()"
+          (seen)="vm.seen($event)"
+          (assess)="vm.beginWorkshopAssessment($event)"
           (exit)="vm.close()"
         />
       } @else {
@@ -136,46 +178,6 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
                   back when one has been added.
                 </p>
               }
-              @if (vm.assessmentSection() === section.sectionId) {
-                <form
-                  class="journey__assessment"
-                  (submit)="
-                    $event.preventDefault(); vm.submitAssessment()
-                  "
-                >
-                  <fieldset [disabled]="vm.busy()">
-                    <legend>
-                      Which Angular building block combines a template
-                      and behavior?
-                    </legend>
-                    <label
-                      ><input
-                        type="radio"
-                        name="answer"
-                        value="component"
-                        [formControl]="vm.answer"
-                      />
-                      A component</label
-                    >
-                    <label
-                      ><input
-                        type="radio"
-                        name="answer"
-                        value="database"
-                        [formControl]="vm.answer"
-                      />
-                      A database index</label
-                    >
-                  </fieldset>
-                  <button
-                    mat-flat-button
-                    type="submit"
-                    [disabled]="!vm.answer.value || vm.busy()"
-                  >
-                    Submit assessment
-                  </button>
-                </form>
-              }
             } @else {
               <p class="journey__progress">
                 Level {{ section.unlockedLevel }} unlocked ·
@@ -198,6 +200,15 @@ import { WorkshopReaderComponent } from '../../components/workshop-reader.compon
                       </p>
                       <h3>{{ workshop.name }}</h3>
                       <p>{{ workshop.summary }}</p>
+                      <p>
+                        {{ workshop.viewedPageIds.length }} /
+                        {{ workshop.pageCount }} pages seen ·
+                        {{
+                          workshop.assessmentsCompleted
+                            ? 'Assessments completed'
+                            : 'Assessment pending'
+                        }}
+                      </p>
                       <button
                         mat-flat-button
                         (click)="vm.start(workshop)"

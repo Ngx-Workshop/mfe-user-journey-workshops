@@ -10,6 +10,11 @@ export const workshop: Workshop = {
   level: 1,
   sortId: 0,
   status: 'available',
+  viewedPageIds: [],
+  pageCount: 1,
+  completedAssessmentIds: [],
+  assessmentCount: 0,
+  assessmentsCompleted: true,
   workshopDocuments: [
     {
       _id: 'page1',

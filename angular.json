@@ -99,6 +99,9 @@
             ],
             "styles": [
               "src/styles.scss"
+            ],
+            "exclude": [
+              "../testing/app/features/example-documents/**/*.spec.ts"
             ]
           }
         }

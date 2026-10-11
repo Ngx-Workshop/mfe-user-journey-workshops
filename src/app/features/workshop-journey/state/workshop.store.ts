@@ -67,7 +67,7 @@ export class WorkshopStore {
   refresh(example = this.sample()) {
     if (!this.pending()) this.reads.next(example);
   }
-  command(id: string, action: 'start' | 'complete') {
+  command(id: string, action: 'start') {
     return defer(() => {
       this.pending.set(true);
       this.failure.set('');
@@ -83,20 +83,26 @@ export class WorkshopStore {
       );
     });
   }
-  assess(sectionId: string, answer: SampleAnswer) {
+  assess(
+    sectionId: string,
+    answer: SampleAnswer,
+    workshopAssessment = false
+  ) {
     return defer(() => {
       this.pending.set(true);
       this.failure.set('');
       ++this.revision;
       this.fetching.set(false);
-      return this.api.assess(this.sample(), sectionId, answer).pipe(
-        tap((result) => this.data.set(result.catalog)),
-        catchError((error) => {
-          this.failure.set(workshopError(error));
-          return EMPTY;
-        }),
-        finalize(() => this.pending.set(false))
-      );
+      return this.api
+        .assess(this.sample(), sectionId, answer, workshopAssessment)
+        .pipe(
+          tap((result) => this.data.set(result.catalog)),
+          catchError((error) => {
+            this.failure.set(workshopError(error));
+            return EMPTY;
+          }),
+          finalize(() => this.pending.set(false))
+        );
     });
   }
   resetExample() {
@@ -112,6 +118,18 @@ export class WorkshopStore {
           return EMPTY;
         }),
         finalize(() => this.pending.set(false))
+      );
+    });
+  }
+  seen(id: string, pageId: string) {
+    return defer(() => {
+      ++this.revision;
+      this.fetching.set(false);
+      return this.api.seen(this.sample(), id, pageId).pipe(
+        tap((data) => {
+          ++this.revision;
+          this.data.set(data);
+        })
       );
     });
   }

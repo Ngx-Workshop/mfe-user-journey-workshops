@@ -27,3 +27,10 @@ features/workshop-journey/{api,models,state,utils,pages/journey,components}. API
 
 ## Editor rendering follow-up
 Use NgxEditorJs2Component directly in the typed reader, with blocks input and requestBlocks=null. The scoped VM maps the page response to NgxEditorJsBlock[] and clears blocks during replacement reads, removing the previous editor while loading. No output handler or save API is added. Preserve the document editor block payload and adapt legacy HTML to a paragraph block. Use a placeholder block for empty pages because the library inserts a default heading for an empty array. Verify actual block rendering, malformed payload rejection, existing progression tests and temporary edits through reopen in the local browser.
+
+## Automatic completion design
+Store viewedPages as atomic workshopId/pageId pairs in the separate progress collection. Add POST workshops/:id/pages/:pageId/seen with authenticated start/access/page ownership checks. Reader reports displayed decoded pages; VM serializes visit writes and retries failures. Catalog derives completion from current page membership and exact authoritative assessment IDs; legacy completedWorkshopIds no longer grant completion. Existing complete endpoint only validates derived completion for backwards clients. Generated DTOs expose viewedPageIds, pageCount, assessmentCount, completedAssessmentIds and assessmentsCompleted. The local example includes two component pages and a separate workshop assessment. No document editor save logic is added.
+
+Journey composition remains a cohesive inline template/style component above the 230-line guideline, with no data orchestration outside its scoped VM. The shared local assessment form serves both section and workshop tests. Obsolete seed tests are excluded alongside their removed runtime source; no removed source was restored.
+
+The reader is also above the component line guideline because it keeps one lesson/outline/navigation/progress presentation together with inline styling. It holds no server state or API client; its post-render output only reports displayed-page intent.

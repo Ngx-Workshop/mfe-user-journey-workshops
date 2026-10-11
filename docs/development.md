@@ -62,3 +62,6 @@ Standalone example (no hosted sign-in needed): http://localhost:4201/?workshopEx
 
 ## Workshop page editor
 Lesson pages use `@tmdjr/ngx-editor-js2` 21.0.9, the same version as the document editor. The editor currently permits temporary changes; no formChanged or blocksRequested handler persists them. Reopening a lesson fetches its original content. Empty pages show an explicit placeholder instead of the library default heading. Malformed serialized blocks show the existing lesson error/retry state. Readonly support is deferred to the library.
+
+## Automatic workshop completion
+The checkbox and complete command were removed. Seen pages are saved after successful decoding/rendering; failures do not count and progress writes offer retry. The local Components workshop now has two pages and a separate assessment. Reset the isolated example, take the initial assessment, visit both pages, then take Component assessment: completion updates automatically. Live users return from the assessment journey and refresh progress. Old self-attested completions may require revisiting pages. Active tests exclude obsolete example-document specs and their fixture because those runtime source files were removed; default npm test now runs the workshop journey tests. Generated contract 0.0.53 is installed from vendor and has not been published.

@@ -18,11 +18,7 @@ export class WorkshopApi {
   catalog(example: boolean) {
     return this.http.get<ProgressCatalog>(this.base(example));
   }
-  command(
-    example: boolean,
-    id: string,
-    action: 'start' | 'complete'
-  ) {
+  command(example: boolean, id: string, action: 'start') {
     return this.http.post<ProgressCatalog>(
       `${this.base(example)}/workshops/${encodeURIComponent(id)}/${action}`,
       {}
@@ -39,9 +35,20 @@ export class WorkshopApi {
       `${this.base(example)}/workshops/${encodeURIComponent(id)}/pages/${encodeURIComponent(pageId)}`
     );
   }
-  assess(example: boolean, sectionId: string, answer: SampleAnswer) {
+  seen(example: boolean, id: string, pageId: string) {
+    return this.http.post<ProgressCatalog>(
+      `${this.base(example)}/workshops/${encodeURIComponent(id)}/pages/${encodeURIComponent(pageId)}/seen`,
+      {}
+    );
+  }
+  assess(
+    example: boolean,
+    sectionId: string,
+    answer: SampleAnswer,
+    workshopAssessment = false
+  ) {
     return this.http.post<SampleResult>(
-      `${this.base(example)}/example-assessments/${encodeURIComponent(sectionId)}`,
+      `${this.base(example)}/${workshopAssessment ? 'example-workshop-assessments' : 'example-assessments'}/${encodeURIComponent(sectionId)}`,
       { answer }
     );
   }

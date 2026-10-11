@@ -34,7 +34,7 @@
     "@angular/compiler-cli": "21.1.0",
     "@tmdjr/ngx-user-metadata": "^21.0.4",
     "@tmdjr/seed-service-nestjs-contracts": "0.0.7",
-    "@tmdjr/user-metadata-contracts": "0.0.52",
+    "@tmdjr/user-metadata-contracts": "file:vendor/tmdjr-user-metadata-contracts-0.0.53.tgz",
     "@types/jasmine": "~5.1.0",
     "http-server": "^14.1.1",
     "jasmine-core": "~5.7.0",
