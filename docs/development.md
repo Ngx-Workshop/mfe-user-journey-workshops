@@ -81,4 +81,23 @@ The checkbox and complete command were removed. Seen pages are saved after succe
 The local preview switch/reset controls were removed. Developers may still opt in using `?workshopExample=local`; sample assessment tests access the scoped VM rather than a learner-facing switch. Current workshop suite: 14 passing ChromeHeadless tests, plus synthetic overview browser checks at 1366px/390px. Completed workshop Retake is a preserved-progress review from the first lesson.
 
 ### Hero motion
-The hero uses theme-token embers and artwork sway, with a pause toggle and reduced-motion support. Run its focused tests using `npm test -- --watch=false --browsers=ChromeHeadless --include='../testing/app/features/workshop-journey/components/workshop-hero.component.spec.ts'` (2 passing tests). Browser checks cover desktop/tablet/phone density, tablet artwork scaling, runtime theme changes and motion preferences; see the [continuity handoff](../specs/003-workshop-continuity/handoff.md). The optimized inline hero style is 5.68kB: production builds warn against the 4kB style budget but pass the unchanged 8kB limit. Its cohesive component-size exception is recorded in the feature plan.
+The hero uses right-weighted theme-token embers with a smooth leftward fade and artwork sway, with a pause toggle and reduced-motion support. Run its focused tests using `npm test -- --watch=false --browsers=ChromeHeadless --include='../testing/app/features/workshop-journey/components/workshop-hero.component.spec.ts'` (3 passing tests). Browser checks cover desktop/tablet/phone density, tablet artwork scaling, runtime theme changes and motion preferences; see the [continuity handoff](../specs/003-workshop-continuity/handoff.md). The optimized inline hero style is 5.84kB: production builds warn against the 4kB style budget but pass the unchanged 8kB limit. Its cohesive component-size exception is recorded in the feature plan.
+
+### Shared hero package
+
+The workshop hero uses `@tmdjr/ngx-shared-headers` 21.0.2 installed from
+`vendor/tmdjr-ngx-shared-headers-21.0.2.tgz`. `npm ci` works with this archive
+without a shared-library checkout. Library source changes require rebuilding and
+packing a new version, replacing the vendor archive and updating the dependency
+and lockfile. Registry publication and switching to a registry version are release
+steps. The focused hero command above now verifies the content wrapper against
+the packaged component. Extraction verification: 4 library tests, 17 remote
+ChromeHeadless tests, producer/consumer production builds, types and architecture
+checks passed. Existing component-size notices remain advisory.
+
+The independent-visuals follow-up adopts shared headers 21.0.3 from
+`vendor/tmdjr-ngx-shared-headers-21.0.3.tgz`, superseding 21.0.2 above. Library suite
+has 6 passing tests; workshop suite retains 17 passing tests. Both producer and
+remote production builds, source types and architecture checks pass. The focused
+hero suite additionally verifies computed pause state for the projected embers
+and artwork. See [004 handoff](../specs/004-shared-journey-hero/handoff.md).

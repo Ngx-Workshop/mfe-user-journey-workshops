@@ -19,3 +19,5 @@ status when work changes. Select work from the user's request and this index;
 the largest folder number is not automatically the active feature.
 
 - [003 Workshop continuity](003-workshop-continuity/spec.md) — Implemented; hosted integration pending.
+
+- [004 Shared journey hero](004-shared-journey-hero/spec.md) — Complete.

@@ -70,3 +70,8 @@ Verification:
 - WARNING: optimized hero inline CSS is 5.68kB, exceeding the 4kB warning budget but below the 8kB error budget. Architecture reports its 433-line cohesive presentation exception, documented in the plan; budgets are unchanged.
 
 Preview used the isolated static bundle, not a gateway: the expected catalog API 404 displays the existing unavailable/retry state. No hosted session, live data or deployment was tested. Temporary preview server/bundle are cleaned up; existing port 4201 server/output are untouched. T012–T014 complete; existing X001 remains pending. Feature artifacts and development guide updated; architecture/contracts are unchanged.
+
+### Right-weighted gradient refinement — 2026-10-12
+Particle origins now use a square-root distribution toward the right. Both theme-colored glows are centered on the right, and a layer opacity mask fades smoothly toward the left. Upward/rightward motion, artwork sway and accessibility behavior are unchanged.
+
+T015 / AC-014 verified: 3 focused ChromeHeadless tests pass, including >=70% right-half origin checks for desktop and phone. Architecture, source types/unused-symbol checks and isolated optimized build pass. Browser checks at 1366px and 390px found 53/72 (73.6%) and 26/36 (72.2%) origins in the right half, the expected transparent-left/opaque-right gradient, and no horizontal overflow. Pause still stops motion; reduced motion yields zero animations. The optimized inline style now warns at 5.84kB (unchanged 4kB warning/8kB error budgets); the cohesive presentation component exception remains applicable. Static preview retains the expected unavailable-catalog state because no gateway is served. Temporary preview resources are cleaned up; hosted integration X001 remains pending.

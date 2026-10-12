@@ -20,3 +20,5 @@
 - [x] T012 Add theme-driven hero embers, artwork sway and accessible motion controls in `src/app/features/workshop-journey/components/workshop-hero.component.ts` (FR-012–014 / AC-011–013). Depends on: none. Verify: browser trajectories, theme colors, responsive layout and motion preferences.
 - [x] T013 Add `testing/app/features/workshop-journey/components/workshop-hero.component.spec.ts` and run hero tests, architecture/types and an isolated production build. Depends on: T012. Verify: particle count/configuration, decorative semantics, pause/resume and unchanged copy.
 - [x] T014 Record hero browser/check evidence in handoff and development guide. Depends on: T012, T013. Verify: AC-011–013 evidence; retain X001 as hosted integration pending.
+
+- [x] T015 Concentrate hero particles/glow on the right with a smooth leftward fade (FR-015 / AC-014). Depends on: T012. Verify: hero spec asserts >=70% right-half origins for desktop/phone; architecture/types/build and responsive browser checks pass; record evidence in handoff.

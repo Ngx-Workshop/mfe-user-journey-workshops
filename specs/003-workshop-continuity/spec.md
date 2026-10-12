@@ -46,3 +46,5 @@ AC-011: Desktop shows 72 staggered glowing particles with upward/rightward traje
 AC-012: At 390px, particles remain behind copy with no horizontal overflow, density reduces to 36, and artwork remains hidden. At tablet width, artwork retains its 0.8 scale while swaying.
 AC-013: Pause stops particles/artwork and resume restarts them. Reduced motion removes particles and artwork animation and hides the unnecessary motion control.
 Assumptions: fire-like intensity means dense glowing embers, not literal orange flames or flashing. This is presentation-only: loading/error/catalog behavior, API requests, routing and federation contracts remain unchanged.
+
+FR-015 / AC-014: Concentrate at least 70% of particle origins in the right half on desktop and phone. Fade particle/glow intensity smoothly toward the left; preserve upward/rightward travel, theme colors, artwork sway and motion controls.

@@ -57,3 +57,22 @@ Explicit resource links include `launch=direct`. After authoritative catalog/his
 Workshop coding-lab links target the canonical explore route with lab and launch=direct; the lab remote resolves server-owned attempt IDs and routes to attempts/:attemptId or results/:attemptId. Outline and next-activity links reuse the same base URL and preserve returnTo/workshopName.
 
 Workshop assessment placement and resource links now use /take-assessment-test/subjects/:subjectId with encoded section IDs. Exact test, launch=direct, returnTo and workshopName remain query context. The assessment remote owns attempts/:attemptId, review and results/:attemptId selection. This supersedes the former overview?view=subject links.
+
+## Shared journey hero — 2026-10-12
+
+`WorkshopHeroComponent` now owns only workshop copy/tags and maps local theme
+aliases to namespaced hero overrides. `NgxJourneyHero` from
+`@tmdjr/ngx-shared-headers` 21.0.2 owns the inline layout, illustration, responsive
+styles, embers and local pause signal. The public API accepts typed text, tag and
+artwork inputs; it has no store/API/router dependencies. The remote consumes an
+immutable checked-in vendor archive until registry release; no sibling source
+checkout is required. See [004 handoff](../specs/004-shared-journey-hero/handoff.md).
+
+### Independent hero visuals — 2026-10-12
+
+Shared headers 21.0.3 adds `NgxHero` with `[heroBackground]` and `[heroArt]`
+projection slots. `NgxJourneyHero` is now a compatibility composition of that layout,
+`NgxHeroEmbers` and `NgxHeroChapterArt`. Its typed content inputs, pause signal and
+particle data remain available. The assessment remote projects its own scanning grid
+and assessment sheet into the same layout. Workshop copy/theme adapter is unchanged.
+The consumer now uses the checked-in 21.0.3 archive instead of 21.0.2.
