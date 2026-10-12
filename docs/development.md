@@ -79,3 +79,6 @@ The checkbox and complete command were removed. Seen pages are saved after succe
 
 ### Learner overview
 The local preview switch/reset controls were removed. Developers may still opt in using `?workshopExample=local`; sample assessment tests access the scoped VM rather than a learner-facing switch. Current workshop suite: 14 passing ChromeHeadless tests, plus synthetic overview browser checks at 1366px/390px. Completed workshop Retake is a preserved-progress review from the first lesson.
+
+### Hero motion
+The hero uses theme-token embers and artwork sway, with a pause toggle and reduced-motion support. Run its focused tests using `npm test -- --watch=false --browsers=ChromeHeadless --include='../testing/app/features/workshop-journey/components/workshop-hero.component.spec.ts'` (2 passing tests). Browser checks cover desktop/tablet/phone density, tablet artwork scaling, runtime theme changes and motion preferences; see the [continuity handoff](../specs/003-workshop-continuity/handoff.md). The optimized inline hero style is 5.68kB: production builds warn against the 4kB style budget but pass the unchanged 8kB limit. Its cohesive component-size exception is recorded in the feature plan.

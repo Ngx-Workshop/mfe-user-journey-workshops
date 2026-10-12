@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -6,7 +6,22 @@ import { MatIconModule } from '@angular/material/icon';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatIconModule],
   template: `
-    <header class="workshop-hero__hero">
+    <header
+      class="workshop-hero__hero"
+      [class.workshop-hero__hero--paused]="motionPaused()"
+    >
+      <div class="workshop-hero__embers" aria-hidden="true">
+        @for (particle of particles; track $index) {
+          <span
+            class="workshop-hero__particle"
+            [style.left.%]="particle.left"
+            [style.width.px]="particle.size"
+            [style.--ember-size]="particle.size + 'px'"
+            [style.animation-duration.s]="particle.duration"
+            [style.animation-delay.s]="particle.delay"
+          ></span>
+        }
+      </div>
       <div class="workshop-hero__hero-copy">
         <div class="workshop-hero__hero-kicker">
           <span></span>YOUR LEARNING PATH
@@ -50,6 +65,16 @@ import { MatIconModule } from '@angular/material/icon';
           <mat-icon>check</mat-icon>
         </div>
       </div>
+      <button
+        class="workshop-hero__motion-toggle"
+        type="button"
+        aria-label="Pause hero animation"
+        [attr.aria-pressed]="motionPaused()"
+        [title]="motionPaused() ? 'Resume hero animation' : 'Pause hero animation'"
+        (click)="motionPaused.set(!motionPaused())"
+      >
+        <mat-icon>{{ motionPaused() ? 'play_arrow' : 'pause' }}</mat-icon>
+      </button>
     </header>
   `,
   styles: [
@@ -61,6 +86,8 @@ import { MatIconModule } from '@angular/material/icon';
         box-sizing: border-box;
       }
       .workshop-hero__hero {
+        position: relative;
+        isolation: isolate;
         padding: 45px clamp(22px, 5vw, 65px);
         display: grid;
         grid-template-columns: minmax(0, 1fr) 260px;
@@ -68,6 +95,96 @@ import { MatIconModule } from '@angular/material/icon';
         overflow: hidden;
         background: var(--soft);
         border-bottom: 1px solid var(--line);
+      }
+      .workshop-hero__embers {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background:
+          radial-gradient(ellipse at 75% 120%,
+            color-mix(in srgb, var(--mat-sys-primary) 18%, transparent),
+            transparent 65%),
+          radial-gradient(ellipse at 20% 130%,
+            color-mix(in srgb, var(--mat-sys-tertiary) 12%, transparent),
+            transparent 55%);
+      }
+      .workshop-hero__particle {
+        position: absolute;
+        bottom: -12px;
+        height: 100%;
+        color: var(--mat-sys-primary);
+        --ember-drift: clamp(48px, 9vw, 140px);
+        animation: workshop-hero-ember-rise linear infinite;
+      }
+      .workshop-hero__particle::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: var(--ember-size);
+        border-radius: 50%;
+        background: currentColor;
+        box-shadow: 0 0 6px 1px currentColor,
+          0 0 15px 3px color-mix(in srgb, currentColor 35%, transparent);
+      }
+      .workshop-hero__particle:nth-child(3n) {
+        color: var(--mat-sys-tertiary);
+      }
+      .workshop-hero__particle:nth-child(3n + 1) {
+        color: var(--mat-sys-secondary);
+      }
+      @keyframes workshop-hero-ember-rise {
+        0% {
+          transform: translate3d(0, 0, 0);
+          opacity: 0;
+        }
+        12% {
+          opacity: 0.65;
+        }
+        30% {
+          transform: translate3d(calc(var(--ember-drift) * 0.4), -30%, 0);
+        }
+        50% {
+          transform: translate3d(calc(var(--ember-drift) * 0.3), -50%, 0);
+          opacity: 0.5;
+        }
+        75% {
+          transform: translate3d(calc(var(--ember-drift) * 0.85), -75%, 0);
+          opacity: 0.3;
+        }
+        100% {
+          transform: translate3d(var(--ember-drift), -110%, 0);
+          opacity: 0;
+        }
+      }
+      .workshop-hero__motion-toggle {
+        position: absolute;
+        right: 12px;
+        bottom: 8px;
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        background: var(--panel);
+        color: var(--muted);
+        cursor: pointer;
+      }
+      .workshop-hero__motion-toggle:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      .workshop-hero__motion-toggle mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+      .workshop-hero__hero--paused .workshop-hero__particle,
+      .workshop-hero__hero--paused .workshop-hero__hero-art {
+        animation-play-state: paused;
       }
       .workshop-hero__hero-kicker {
         display: flex;
@@ -124,6 +241,17 @@ import { MatIconModule } from '@angular/material/icon';
         display: grid;
         place-items: center;
         min-height: 240px;
+        animation: workshop-hero-art-sway 7s ease-in-out infinite;
+      }
+      @keyframes workshop-hero-art-sway {
+        0%, 100% {
+          translate: -4px 3px;
+          rotate: -1deg;
+        }
+        50% {
+          translate: 8px -7px;
+          rotate: 1.5deg;
+        }
       }
       .workshop-hero__orb {
         position: absolute;
@@ -257,9 +385,13 @@ import { MatIconModule } from '@angular/material/icon';
         }
       }
       @media (max-width: 600px) {
+        .workshop-hero__particle:nth-child(n + 37) {
+          display: none;
+        }
         .workshop-hero__hero {
           grid-template-columns: 1fr;
           gap: 0;
+          padding-bottom: 52px;
         }
         .workshop-hero__hero-art {
           display: none;
@@ -277,7 +409,25 @@ import { MatIconModule } from '@angular/material/icon';
           font-size: 12px;
         }
       }
+      @media (prefers-reduced-motion: reduce) {
+        .workshop-hero__embers,
+        .workshop-hero__motion-toggle {
+          display: none;
+        }
+        .workshop-hero__particle,
+        .workshop-hero__hero-art {
+          animation: none;
+        }
+      }
     `,
   ],
 })
-export class WorkshopHeroComponent {}
+export class WorkshopHeroComponent {
+  readonly motionPaused = signal(false);
+  readonly particles = Array.from({ length: 72 }, (_, index) => ({
+    left: (index * 37) % 100,
+    size: 2 + (index % 4),
+    duration: 3.2 + ((index * 7) % 23) / 10,
+    delay: -((index * 13) % 53) / 10,
+  }));
+}

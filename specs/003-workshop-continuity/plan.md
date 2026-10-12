@@ -20,3 +20,10 @@ Update JourneyViewModel.labUrl to /coding-labs/explore; reader/outline activityU
 
 ### Canonical assessment route
 JourneyViewModel.assessmentUrl encodes the section ID into subjects/:subjectId, removing view/subject query selectors. Existing activityUrl composition retains exact test/direct launch and workshop context. Extend the existing continuity regression for the canonical path, encoded identity and shared reader URL composition; verify tests/architecture/types and isolated build.
+
+### Hero embers
+Keep the effect in the standalone OnPush workshop hero, using 72 deterministic particle configurations and inline BEM styles. CSS animates transforms/opacity only, with negative delays for immediate steady-state density; no canvas, timers, dependencies or runtime randomness. Full-height particle tracks make upward travel relative to the actual hero height. Material system tokens drive glow/color, including theme changes. Isolate and clip the background; layer copy/artwork above it. Reduce phone density by half.
+
+Use individual CSS translate/rotate for artwork sway to preserve its existing tablet transform scale. A local signal controls pause/resume; reduced-motion CSS disables decoration and animation. No API/store/VM or public contract changes. The already oversized hero remains a cohesive inline HTML/SCSS presentation component; extra styling is kept here rather than split solely to meet a line count.
+
+Verify AC-011–013 with a mirrored hero component spec, architecture/types, an isolated optimized build, and synthetic local browser checks at desktop/tablet/phone sizes, theme-token changes, pause/resume and reduced motion. No external repository changes are required; existing signed-in journey integration remains X001.

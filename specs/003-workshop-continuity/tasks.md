@@ -16,3 +16,7 @@
 - [x] T010 Update canonical lab links and verify shared reader/outline URL composition (FR-010 / AC-009).
 
 - [x] T011 Update canonical assessment links and verify resource/lesson context (FR-011 / AC-010).
+
+- [x] T012 Add theme-driven hero embers, artwork sway and accessible motion controls in `src/app/features/workshop-journey/components/workshop-hero.component.ts` (FR-012–014 / AC-011–013). Depends on: none. Verify: browser trajectories, theme colors, responsive layout and motion preferences.
+- [x] T013 Add `testing/app/features/workshop-journey/components/workshop-hero.component.spec.ts` and run hero tests, architecture/types and an isolated production build. Depends on: T012. Verify: particle count/configuration, decorative semantics, pause/resume and unchanged copy.
+- [x] T014 Record hero browser/check evidence in handoff and development guide. Depends on: T012, T013. Verify: AC-011–013 evidence; retain X001 as hosted integration pending.

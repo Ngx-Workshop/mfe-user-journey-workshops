@@ -37,3 +37,12 @@ FR-010 / AC-009: Workshop coding-lab links use /coding-labs/explore with exact l
 
 ## Canonical assessment links — 2026-10-11
 FR-011 / AC-010: Placement and assignment links use /take-assessment-test/subjects/:subjectId, encoding the section identity as a single path segment. Preserve exact test, launch=direct, workshopName and lesson returnTo; reader outline/next activity share the same base. The assessment remote owns attempt/review/result routing.
+
+## Hero embers — 2026-10-12
+FR-012: Add a dense, fire-like decorative particle background that travels upward with a rightward swaying drift. Use the currently selected Material primary, secondary and tertiary palette, not fixed fire colors.
+FR-013: Gently sway the entire hero artwork without changing its existing tablet scale or mobile visibility. Keep copy readable and interactions unobstructed.
+FR-014: Honor reduced-motion preferences and provide a keyboard-accessible pause/resume control for continuous decorative motion.
+AC-011: Desktop shows 72 staggered glowing particles with upward/rightward trajectories and swaying artwork; changing theme tokens updates particle colors without rebuilding.
+AC-012: At 390px, particles remain behind copy with no horizontal overflow, density reduces to 36, and artwork remains hidden. At tablet width, artwork retains its 0.8 scale while swaying.
+AC-013: Pause stops particles/artwork and resume restarts them. Reduced motion removes particles and artwork animation and hides the unnecessary motion control.
+Assumptions: fire-like intensity means dense glowing embers, not literal orange flames or flashing. This is presentation-only: loading/error/catalog behavior, API requests, routing and federation contracts remain unchanged.

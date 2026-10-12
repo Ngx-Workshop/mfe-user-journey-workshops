@@ -56,3 +56,17 @@ Verification: all 14 ChromeHeadless tests pass with HTTP/Router doubles, includi
 Placement and assignment links now use /take-assessment-test/subjects/:subjectId with encoded section IDs. The outline and next-activity links share this base. Exact test, launch=direct, workshopName and lesson returnTo are preserved; assessment remote owns attempt/review/result path selection. This supersedes earlier overview query-selector links.
 
 Verification: 14 workshop ChromeHeadless tests pass, including the rendered placement href, encoded subject IDs and reader URL composition/context. Architecture, source type/unused checks and git diff --check pass. Production build passes at /tmp/workshop-assessment-routing-links-build. Assessment routing suite has 39 passing tests and its own isolated build. Tests use doubles; no signed-in hosted walkthrough/deployment was performed. T011 complete; X001 remains pending. Architecture/spec/plan/tasks updated.
+
+## Hero embers — 2026-10-12
+The hero now has 72 staggered glowing embers rising with a rightward swaying drift and a subtle palette-driven glow at the base. Colors inherit Material primary/secondary/tertiary tokens, updating with the theme. The entire artwork gently translates/rotates independently of its preserved tablet scale. Copy and interactions remain above the clipped, pointer-transparent decoration.
+
+Phones show 36 particles and retain hidden artwork. A keyboard-accessible toggle pauses/resumes both effects. Reduced-motion preferences hide embers/control and remove artwork animation. Mobile bottom padding provides clearance for the toggle. No new dependencies, timers, API/state changes or integration contracts.
+
+Verification:
+- PASS: 2 focused hero ChromeHeadless tests (`npm test -- --watch=false --browsers=ChromeHeadless --include='../testing/app/features/workshop-journey/components/workshop-hero.component.spec.ts'`) cover count/staggering, decorative semantics, preserved heading and accessible pause/resume.
+- PASS: `npm run check:architecture`, source TypeScript/unused-symbol checks, and isolated optimized build (`npm run build -- --output-path dist/hero-verification`).
+- PASS: standalone browser checks at 1366px, 800px and 390px: no horizontal overflow; 72/36 visible particles; tablet artwork retains matrix scale 0.8. Phone control has 8px clearance below copy after correcting an overlap caught during verification.
+- PASS: sampled particle transforms rise from y=-105px to -261px while x sways 49px -> 37px -> 104px. Runtime token overrides immediately update all three particle/glow colors. Pause freezes transforms; Enter resumes motion. Desktop reduced motion retains static artwork with zero active animations; reverting restores 73 animations.
+- WARNING: optimized hero inline CSS is 5.68kB, exceeding the 4kB warning budget but below the 8kB error budget. Architecture reports its 433-line cohesive presentation exception, documented in the plan; budgets are unchanged.
+
+Preview used the isolated static bundle, not a gateway: the expected catalog API 404 displays the existing unavailable/retry state. No hosted session, live data or deployment was tested. Temporary preview server/bundle are cleaned up; existing port 4201 server/output are untouched. T012–T014 complete; existing X001 remains pending. Feature artifacts and development guide updated; architecture/contracts are unchanged.
