@@ -83,7 +83,14 @@ export class JourneyViewModel {
   readonly message = signal('');
   readonly overviewView = signal<'active' | 'completed'>('active');
   readonly search = signal('');
-  readonly assessmentLinks = computed(() => Object.fromEntries(this.sections().map(s => [s.sectionId, this.assessmentUrl(s.sectionId)])));
+  readonly assessmentLinks = computed(() =>
+    Object.fromEntries(
+      this.sections().map((s) => [
+        s.sectionId,
+        this.assessmentUrl(s.sectionId),
+      ])
+    )
+  );
   readonly sections = computed(() => this.catalog()?.sections ?? []);
   constructor() {
     this.commands
@@ -174,13 +181,19 @@ export class JourneyViewModel {
       )
       .subscribe();
     const search = this.document.location?.search ?? '';
-    const restore = (params: URLSearchParams | import('@angular/router').ParamMap) => {
+    const restore = (
+      params: URLSearchParams | import('@angular/router').ParamMap
+    ) => {
       this.requestedWorkshop = params.get('workshop');
       this.requestedPage = params.get('page');
-      if (!this.requestedWorkshop && this.selectedId()) this.close(false);
+      if (!this.requestedWorkshop && this.selectedId())
+        this.close(false);
       this.restoreSelection();
     };
-    if (this.route) this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroy)).subscribe(restore);
+    if (this.route)
+      this.route.queryParamMap
+        .pipe(takeUntilDestroyed(this.destroy))
+        .subscribe(restore);
     else restore(new URLSearchParams(search));
     effect(() => {
       this.catalog();
@@ -213,7 +226,12 @@ export class JourneyViewModel {
       this.commands.next({ id: workshop._id, action: 'start' });
   }
   retake(workshop: Workshop) {
-    if (!this.busy() && !this.loading() && workshop.status === 'completed') this.open(workshop._id);
+    if (
+      !this.busy() &&
+      !this.loading() &&
+      workshop.status === 'completed'
+    )
+      this.open(workshop._id);
   }
   seen(pageId: string) {
     const workshop = this.selected();
@@ -228,7 +246,14 @@ export class JourneyViewModel {
       ?.workshopDocuments.slice()
       .sort((a, b) => a.sortId - b.sortId)
       .find((p) => p.kind === 'PAGE');
-    const resume = this.selected()?.workshopDocuments.slice().sort((a, b) => a.sortId - b.sortId).find(p => p.kind === 'PAGE' && !this.selected()?.viewedPageIds.includes(p._id));
+    const resume = this.selected()
+      ?.workshopDocuments.slice()
+      .sort((a, b) => a.sortId - b.sortId)
+      .find(
+        (p) =>
+          p.kind === 'PAGE' &&
+          !this.selected()?.viewedPageIds.includes(p._id)
+      );
     if (resume || first) this.read((resume ?? first)!._id);
     else {
       this.pageId.set('');
@@ -275,36 +300,73 @@ export class JourneyViewModel {
   }
   private restoreSelection() {
     if (!this.requestedWorkshop || !this.catalog()) return;
-    const workshop = this.catalog()?.sections.flatMap(s => s.workshops).find(w => w._id === this.requestedWorkshop);
+    const workshop = this.catalog()
+      ?.sections.flatMap((s) => s.workshops)
+      .find((w) => w._id === this.requestedWorkshop);
     if (!workshop) {
       this.close(false);
-      this.message.set('This workshop is unavailable. Choose an available workshop to continue.');
+      this.message.set(
+        'This workshop is unavailable. Choose an available workshop to continue.'
+      );
       return;
     }
-    const page = workshop.workshopDocuments.find(p => p.kind === 'PAGE' && p._id === this.requestedPage)
-      ?? workshop.workshopDocuments.slice().sort((a, b) => a.sortId - b.sortId).find(p => p.kind === 'PAGE');
-    if (this.selectedId() === workshop._id && this.pageId() === (page?._id ?? '')) return;
+    const page =
+      workshop.workshopDocuments.find(
+        (p) => p.kind === 'PAGE' && p._id === this.requestedPage
+      ) ??
+      workshop.workshopDocuments
+        .slice()
+        .sort((a, b) => a.sortId - b.sortId)
+        .find((p) => p.kind === 'PAGE');
+    if (
+      this.selectedId() === workshop._id &&
+      this.pageId() === (page?._id ?? '')
+    )
+      return;
     this.selectedId.set(workshop._id);
     if (page) this.read(page._id);
-    else { this.pageId.set(''); this.pages.next(null); }
+    else {
+      this.pageId.set('');
+      this.pages.next(null);
+    }
   }
-  private updateSelection(workshop: string | null, page: string | null) {
+  private updateSelection(
+    workshop: string | null,
+    page: string | null
+  ) {
     this.requestedWorkshop = workshop;
     this.requestedPage = page;
-    if (this.router) void this.router.navigate([], {
-      relativeTo: this.route ?? undefined, queryParams: { workshop, page }, queryParamsHandling: 'merge',
-    });
+    if (this.router)
+      void this.router.navigate([], {
+        relativeTo: this.route ?? undefined,
+        queryParams: { workshop, page },
+        queryParamsHandling: 'merge',
+      });
   }
   activity({ url, event }: { url: string; event: MouseEvent }) {
-    if (this.router && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey && event.button === 0) {
+    if (
+      this.router &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.shiftKey &&
+      !event.altKey &&
+      event.button === 0
+    ) {
       event.preventDefault();
       if (!this.busy()) void this.router.navigateByUrl(url);
     }
   }
   assessmentUrl(sectionId: string, test?: string) {
     const params = new URLSearchParams();
-    if (test) { params.set('test', test); params.set('launch', 'direct'); }
-    return this.activityUrl('/take-assessment-test/subjects/' + encodeURIComponent(sectionId), params);
+    if (test) {
+      params.set('test', test);
+      params.set('launch', 'direct');
+    }
+    return this.activityUrl(
+      '/take-assessment-test/subjects/' +
+        encodeURIComponent(sectionId),
+      params
+    );
   }
   labUrl(lab: string) {
     const params = new URLSearchParams({ lab });
@@ -319,7 +381,11 @@ export class JourneyViewModel {
       if (this.pageId()) selection.set('page', this.pageId());
       params.set('workshopName', workshop.name);
     }
-    params.set('returnTo', '/workshops/overview' + (selection.size ? '?' + selection.toString() : ''));
+    params.set(
+      'returnTo',
+      '/workshops/overview' +
+        (selection.size ? '?' + selection.toString() : '')
+    );
     return path + '?' + params.toString();
   }
 }

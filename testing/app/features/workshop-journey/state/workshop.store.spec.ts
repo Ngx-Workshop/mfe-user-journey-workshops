@@ -52,7 +52,9 @@ describe('WorkshopStore', () => {
       ...catalog(),
       sections: [{ ...catalog().sections[0], completedCount: 1 }],
     };
-    http.expectOne(`${base}/workshops/w1/pages/page1/seen`).flush(completed);
+    http
+      .expectOne(`${base}/workshops/w1/pages/page1/seen`)
+      .flush(completed);
     old.flush(catalog());
     expect(store.catalog()?.sections[0].completedCount).toBe(1);
     expect(store.busy()).toBeFalse();

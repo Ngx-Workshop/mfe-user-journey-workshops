@@ -1,4 +1,8 @@
-export function activityUrl(base: string, key: 'test' | 'lab', id?: string): string | null {
+export function activityUrl(
+  base: string,
+  key: 'test' | 'lab',
+  id?: string
+): string | null {
   if (!id) return null;
   const [path, query] = base.split('?');
   const params = new URLSearchParams(query);
