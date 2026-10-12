@@ -41,7 +41,7 @@ describe('Workshop journey', () => {
     );
     expect(element.textContent).not.toContain('First component');
     expect(element.querySelector('a')?.getAttribute('href')).toBe(
-      '/take-assessment-test/overview?view=subject&subject=angular&returnTo=%2Fworkshops%2Foverview'
+      '/take-assessment-test/subjects/angular?returnTo=%2Fworkshops%2Foverview'
     );
     expect(element.textContent).toContain('Take initial assessment');
   });

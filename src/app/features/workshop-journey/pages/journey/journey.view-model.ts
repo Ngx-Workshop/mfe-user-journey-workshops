@@ -302,9 +302,9 @@ export class JourneyViewModel {
     }
   }
   assessmentUrl(sectionId: string, test?: string) {
-    const params = new URLSearchParams({ view: 'subject', subject: sectionId });
+    const params = new URLSearchParams();
     if (test) { params.set('test', test); params.set('launch', 'direct'); }
-    return this.activityUrl('/take-assessment-test/overview', params);
+    return this.activityUrl('/take-assessment-test/subjects/' + encodeURIComponent(sectionId), params);
   }
   labUrl(lab: string) {
     const params = new URLSearchParams({ lab });

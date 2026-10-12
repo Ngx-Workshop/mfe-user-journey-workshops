@@ -14,3 +14,5 @@
 - [x] T009 Implement and verify direct assignment launch (FR-009 / AC-008).
 
 - [x] T010 Update canonical lab links and verify shared reader/outline URL composition (FR-010 / AC-009).
+
+- [x] T011 Update canonical assessment links and verify resource/lesson context (FR-011 / AC-010).

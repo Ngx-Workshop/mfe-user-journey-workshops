@@ -17,3 +17,6 @@ Add launch=direct to workshop resource URLs. Scoped VMs resolve exact catalog re
 
 ### Canonical lab route
 Update JourneyViewModel.labUrl to /coding-labs/explore; reader/outline activityUrl composition inherits the canonical base. Preserve resource and workshop query context. Extend the existing continuity regression to verify the target and composed reader URL; run workshop tests, architecture/types and an isolated production build. No external writes or API changes.
+
+### Canonical assessment route
+JourneyViewModel.assessmentUrl encodes the section ID into subjects/:subjectId, removing view/subject query selectors. Existing activityUrl composition retains exact test/direct launch and workshop context. Extend the existing continuity regression for the canonical path, encoded identity and shared reader URL composition; verify tests/architecture/types and isolated build.

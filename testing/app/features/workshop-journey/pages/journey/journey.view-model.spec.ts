@@ -22,6 +22,13 @@ describe('Workshop activity continuity', () => {
     http.expectOne('/api/user-metadata/workshop-progress/workshops/w1/pages/page2').flush({ name: 'Next lesson', html: '' });
     expect(vm.selectedId()).toBe('w1'); expect(vm.pageId()).toBe('page2');
     const assessment = new URL(vm.assessmentUrl('angular', 'test/one'), 'https://example.test');
+    expect(assessment.pathname).toBe('/take-assessment-test/subjects/angular');
+    expect(assessment.searchParams.has('view')).toBeFalse();
+    expect(assessment.searchParams.has('subject')).toBeFalse();
+    expect(new URL(vm.assessmentUrl('section/one'), 'https://example.test').pathname).toBe('/take-assessment-test/subjects/section%2Fone');
+    const readerAssessment = new URL(activityUrl(vm.assessmentUrl('angular'), 'test', 'test/one')!, 'https://example.test');
+    expect(readerAssessment.pathname).toBe(assessment.pathname);
+    expect([...readerAssessment.searchParams.entries()].sort()).toEqual([...assessment.searchParams.entries()].sort());
     expect(assessment.searchParams.get('test')).toBe('test/one');
     expect(assessment.searchParams.get('launch')).toBe('direct');
     expect(assessment.searchParams.get('returnTo')).toBe('/workshops/overview?workshop=w1&page=page2');

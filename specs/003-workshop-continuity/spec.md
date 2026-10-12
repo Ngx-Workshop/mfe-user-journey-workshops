@@ -34,3 +34,6 @@ This supersedes the earlier no-auto-start decision for explicit workshop assignm
 
 ## Canonical coding-lab links — 2026-10-11
 FR-010 / AC-009: Workshop coding-lab links use /coding-labs/explore with exact lab identity, launch=direct, workshopName and lesson returnTo. Outline and next activity preserve this contract; the coding-lab remote owns attempt/result path selection. This supersedes the previous hello-world target.
+
+## Canonical assessment links — 2026-10-11
+FR-011 / AC-010: Placement and assignment links use /take-assessment-test/subjects/:subjectId, encoding the section identity as a single path segment. Preserve exact test, launch=direct, workshopName and lesson returnTo; reader outline/next activity share the same base. The assessment remote owns attempt/review/result routing.
