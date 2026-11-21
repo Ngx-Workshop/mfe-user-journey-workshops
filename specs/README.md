@@ -22,4 +22,4 @@ the largest folder number is not automatically the active feature.
 
 - [004 Shared journey hero](004-shared-journey-hero/spec.md) — Complete.
 
-- [005-static-deployment-cleanup](005-static-deployment-cleanup/spec.md): Static deployment cleanup; helper verified, Actions rollout pending.
+- [005-static-deployment-cleanup](005-static-deployment-cleanup/spec.md): Static deployment cleanup; helper tests, Actions rollout and live Nginx entrypoints verified.
